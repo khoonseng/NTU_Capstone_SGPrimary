@@ -1,0 +1,14 @@
+sg_primary_dbt:
+  outputs:
+    dev:
+      type: bigquery
+      dataset: sg_moe
+      project: test-sg-moe
+      keyfile: ../keys/test-sg-moe-c73285ae4b6b.json
+      location: US
+      method: service-account
+      priority: interactive
+      threads: 1
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+  target: dev

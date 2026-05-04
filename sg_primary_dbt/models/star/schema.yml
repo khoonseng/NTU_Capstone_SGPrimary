@@ -1,0 +1,169 @@
+version: 1
+
+models:
+  - name: dim_school
+    description: "Dimension table for schools."
+    columns:
+      # - name: station_key
+      #   description: "The primary key (surrogate key) for this table"
+      #   tests:
+      #     - unique
+      #     - not_null
+
+      - name: school_name
+        description: "The name of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: url_address
+        description: "The website of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: address
+        description: "The address of each school"
+        tests:
+          - not_null
+
+      - name: postal_code
+        description: "The postal code of each school"
+        tests:
+          - not_null
+
+      - name: telephone_no
+        description: "The main telephone number of each school"
+        tests:
+          - not_null
+
+      - name: telephone_no_2
+        description: "The secondary telephone number of each school"
+        tests:
+          - not_null
+          
+      - name: fax_no
+        description: "The main fax number of each school"
+        tests:
+          - not_null
+
+      - name: fax_no_2
+        description: "The secondary fax number of each school"
+        tests:
+          - not_null
+
+      - name: email_address
+        description: "The email address of each school"
+        tests:
+          - unique
+          - not_null
+          
+      - name: mrt_desc
+        description: "The closest MRT stations of each school"
+        tests:
+          - not_null
+          
+      - name: bus_desc
+        description: "The available buses of each school"
+        tests:
+          - not_null
+          
+      - name: principal_name
+        description: "The principal of each school"
+        tests:
+          - not_null
+          
+      - name: first_vp_name
+        description: "The first vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: second_vp_name
+        description: "The second vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: third_vp_name
+        description: "The third vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: fourth_vp_name
+        description: "The fourth vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: fifth_vp_name
+        description: "The fifth vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: sixth_vp_name
+        description: "The sixth vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: dgp_code
+        description: "The development guide plan code of each school"
+        tests:
+          - not_null
+          
+      - name: zone_code
+        description: "The zone code of each school"
+        tests:
+          - not_null
+          
+      - name: type_code
+        description: "The type of each school"
+        tests:
+          - not_null
+          
+      - name: nature_code
+        description: "The nature of each school"
+        tests:
+          - not_null
+          
+      - name: session_code
+        description: "The cirriculum session of each school"
+        tests:
+          - not_null
+          
+      - name: mainlevel_code
+        description: "The education level of each school"
+        tests:
+          - not_null
+          
+      - name: sap_ind
+        description: "Indicator to represent if a school offers Special Assistance Plan"
+        tests:
+          - not_null
+          
+      - name: autonomous_ind
+        description: "Indicator to represent if a school is autonomous to introduce special programmes"
+        tests:
+          - not_null
+          
+      - name: gifted_ind
+        description: "Indicator to represent if a school offers gifted education programmes "
+        tests:
+          - not_null
+          
+      - name: ip_ind
+        description: "Indicator to represent if a school offers integrated programme"
+        tests:
+          - not_null
+          
+      - name: mothertongue1_code
+        description: "The first mother tongue offered in each school"
+        tests:
+          - not_null
+                    
+      - name: mothertongue2_code
+        description: "The second mother tongue offered in each school"
+        tests:
+          - not_null
+                    
+      - name: mothertongue3_code
+        description: "The third mother tongue offered in each school"
+        tests:
+          - not_null

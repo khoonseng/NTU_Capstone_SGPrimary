@@ -1,0 +1,8 @@
+version: 1
+
+sources:
+  - name: sg_moe
+    database: test-sg-moe    
+
+    tables:
+      - name: raw_schools
