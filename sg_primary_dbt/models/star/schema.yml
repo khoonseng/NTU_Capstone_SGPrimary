@@ -10,7 +10,7 @@ models:
           - unique
           - not_null
 
-      - name: school_name
+      - name: school_name_clean
         description: "The name of each school"
         tests:
           - unique

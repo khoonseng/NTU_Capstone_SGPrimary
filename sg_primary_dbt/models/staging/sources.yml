@@ -6,3 +6,4 @@ sources:
 
     tables:
       - name: raw_schools
+      - name: raw_sgschooling_balloting

@@ -5,11 +5,16 @@ seeds:
   - name: phases
     description: "Reference table for P1 registration phases."
     columns:
-      - name: phase_normalised
+      - name: phase_raw
         description: "The unique phase code for each phase"
         tests:
           - unique
           - not_null         
+
+      - name: phase_normalised
+        description: "The unique phase code for each phase"
+        tests:
+          - not_null  
 
       - name: valid_from_year
         description: "First year this phase was in use"
