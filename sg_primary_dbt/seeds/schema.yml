@@ -1,0 +1,64 @@
+version: 1
+
+seeds:
+  # Phases
+  - name: phases
+    description: "Reference table for P1 registration phases."
+    columns:
+      - name: phase_normalised
+        description: "The unique phase code for each phase"
+        tests:
+          - unique
+          - not_null         
+
+      - name: valid_from_year
+        description: "First year this phase was in use"
+        tests:
+          - not_null
+
+      - name: is_competitive
+        tests:
+          - not_null
+
+  - name: balloting_codes
+    description: "Reference table for ballot scenario codes."
+    columns:
+      - name: codes
+        tests:
+          - unique
+          - not_null
+
+  - name: school_lifecycle
+    description: "Tracks school mergers, relocations and intake gaps."
+    columns:
+      - name: school_name_clean
+        tests:
+          - unique
+          - not_null
+
+      - name: school_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['relocated_gap', 'merged']
+
+  - name: school_name_mapping
+    description: "Maps raw sgschooling school names to MOE school names from data.gov.sg."
+    columns:
+      - name: sgschooling_name
+        tests:
+          - unique
+          - not_null
+
+      - name: moe_school_name
+        tests:
+          - unique
+          - not_null
+
+  - name: school_status
+    description: "Lookup table for school status codes and descriptions."
+    columns:
+      - name: school_status
+        tests:
+          - unique
+          - not_null
