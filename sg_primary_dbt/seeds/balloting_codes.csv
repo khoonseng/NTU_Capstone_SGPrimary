@@ -1,0 +1,12 @@
+﻿priority,codes,description,additional_notes,has_balloting
+1,SC<1,Singapore Citizens living within 1km of the school,Highest priority — admitted first,TRUE
+2,SC1-2,Singapore Citizens living between 1km and 2km of the school,Considered after all within-1km SC are placed,TRUE
+3,SC>2,Singapore Citizens living outside 2km of the school,Lowest SC priority — admitted only if places remain,TRUE
+4,PR<1,Permanent Residents living within 1km of the school,First PR tier — subject to PR cap,TRUE
+5,PR1-2,Permanent Residents living between 1km and 2km of the school,Subject to PR cap and remaining capacity,TRUE
+6,PR>2,Permanent Residents living outside 2km of the school,Lowest priority — rarely reached at popular schools,TRUE
+7,SC<1#,"Singapore Citizens living within 1km of the school all admitted, with no leftover",,FALSE
+8,SC1-2#,"Singapore Citizens living between 1km and 2km of the school all admitted, with no leftover",,FALSE
+9,SC>2#,"Singapore Citizens living outside 2km of the school all admitted, with no leftover for Permanent Residents",,FALSE
+10,PR<1#,"Permanent Residents living within 1km of the school all admitted, with no leftover",,FALSE
+11,PR1-2#,"Permanent Residents living between 1km and 2km of the school all admitted, with no leftover",,FALSE

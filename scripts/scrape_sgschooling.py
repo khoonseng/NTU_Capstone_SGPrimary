@@ -237,6 +237,7 @@ def scrape_year(year: int) -> pd.DataFrame:
     print(f"  Fetching {url} ...")
     response = requests.get(url, timeout=30)
     response.raise_for_status()
+    response.encoding = 'utf-8'
 
     records = parse_year_page(response.text, year)
     df = pd.DataFrame(records)

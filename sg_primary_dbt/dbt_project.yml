@@ -40,3 +40,23 @@ models:
     star:
       +materialized: table
       +schema: star
+
+seeds:
+  sg_primary_dbt:
+    +schema: seeds
+
+    phases:
+      +column_types:
+        valid_from_year: integer
+        valid_to_year: integer
+        is_competitive: bool
+
+    balloting_codes:
+      +column_types:
+        priority: integer
+        has_balloting: bool
+
+    school_lifecycle:
+      +column_types:
+        inactive_from_year: integer
+        inactive_to_year: integer    
