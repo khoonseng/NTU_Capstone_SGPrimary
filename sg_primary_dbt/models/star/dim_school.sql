@@ -8,8 +8,8 @@ lifecycle AS (
 
 joined AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['s.school_name_clean']) }} AS school_key,
-        s.school_name_clean,
+        -- {{ dbt_utils.generate_surrogate_key(['school_name_clean']) }} AS school_key,
+        COALESCE(s.school_name_clean, l.school_name_clean) as school_name_clean,
         s.address,
         s.postal_code,
         s.dgp_code,
@@ -51,8 +51,15 @@ joined AS (
         END                                     AS is_active
 
     FROM schools s
-    LEFT JOIN lifecycle l
-        ON s.school_name_clean = l.school_name_clean
+    FULL OUTER JOIN lifecycle l
+    ON s.school_name_clean = l.school_name_clean
+),
+
+final as (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['school_name_clean']) }} AS school_key,
+        *
+    FROM joined        
 )
 
-SELECT * FROM joined
+SELECT * FROM final

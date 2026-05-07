@@ -1,0 +1,74 @@
+{{
+  config(
+    materialized='table',
+    partition_by={
+      "field": "registration_year",
+      "data_type": "integer",
+      "range": {"start": 2009, "end": 2050, "interval": 1}
+    },
+    cluster_by=["school_key", "phase_normalised"]
+  )
+}}
+
+-- One row per school × year × phase.
+WITH balloting AS (
+    SELECT * FROM {{ ref('stg_sgschooling_balloting') }}
+),
+
+schools AS (
+    SELECT 
+        school_key, 
+        school_name_clean, 
+        school_status,
+        CASE
+            WHEN is_active
+            THEN 'School is active for enrollment'
+            WHEN NOT is_active AND school_status = 'merged'
+            THEN 'School is not for enrollment. It was merged under ' || merged_into || ' on ' || inactive_from_year
+            WHEN NOT is_active AND school_status = 'relocated_gap'
+            THEN 'School is not for enrollment. Enrollment was ceased in ' || inactive_from_year || ' and will be reopened in ' || (inactive_to_year + 1)
+            ELSE 'Unknown status'
+        END AS school_status_description,
+        is_active
+    FROM {{ ref('dim_school') }}
+),
+
+joined AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key([
+            'b.school_name_clean',
+            'b.registration_year',
+            'b.phase_normalised'
+        ]) }}                                   AS balloting_key,
+
+        s.school_key,
+        b.school_name_clean,
+        s.school_status,
+        s.school_status_description,
+        s.is_active,
+        b.phase_normalised,
+        b.phase_raw,
+        -- b.is_competitive,
+        b.registration_year,
+        b.total_vacancy,
+        b.vacancy,
+        b.applied,
+        b.taken,
+        b.has_full_figures,
+        b.subscription_rate,
+        b.remaining_places,
+        b.is_over_enrolled,
+        b.over_enrolled_count,
+        b.ballot_scenario_code,
+        b.ballot_description,
+        b.ballot_applicants,
+        b.ballot_vacancies,
+        b.ballot_chance_pct,
+        b.scraped_at
+
+    FROM balloting b
+    LEFT JOIN schools s
+    ON b.school_name_clean = s.school_name_clean
+)
+
+SELECT * FROM joined
