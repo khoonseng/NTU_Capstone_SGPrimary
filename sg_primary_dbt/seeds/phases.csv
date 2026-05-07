@@ -1,9 +1,9 @@
-﻿phase_normalised,phase_label,valid_from_year,valid_to_year,is_competitive,balloting_required,qualified_groups,distance,eligibility
-1,Phase 1 - Siblings,2009,,FALSE,No,Child has sibling in school (SC only),Not applicable,"SC,PR"
-2A(1),Phase 2A(1) - Alumni/Staff,2009,2021,TRUE,If oversubscribed,"Alumni parent/sibling, SAC, staff",Distance tiebreaker within citizenship group,"SC,PR"
-2A(2),Phase 2A(2) - MOE Kindergarten,2009,2021,TRUE,If oversubscribed,MOE Kindergarten,Distance tiebreaker within citizenship group,"SC,PR"
-2A,Phase 2A (merged),2022,,TRUE,If oversubscribed,"Alumni parent/sibling, SAC, staff, MOE Kindergarten",Distance tiebreaker within citizenship group,"SC,PR"
-2B,Phase 2B,2009,,TRUE,Yes (20 reserved places),"Volunteer parent (40h), church/clan, community leaders",Distance priority within citizenship group,"SC,PR"
-2C,Phase 2C,2009,,TRUE,Yes (40 reserved places),All SC and PR children,Yes: 1km > 1–2km > beyond 2km. SC > PR within each band,"SC,PR"
-2C(S),Phase 2C Supplementary,2009,,TRUE,MOE may assign,For those unsuccessful SC/PR in Phase 2C,Distance priority still applies; MOE assigns to nearest school with vacancies if needed.,"SC,PR"
-3,Phase 3 - International,2009,,TRUE,Subject to vacancies,International students,Not a key factor; vacancies depend on what is left.,"non-SC,non-PR"
+﻿phase_raw,phase_normalised,phase_raw_label,phase_normalised_label,valid_from_year,valid_to_year,is_competitive,balloting_required,qualified_groups,distance,eligibility
+1,1,Phase 1 - Siblings,Phase 1 - Siblings,2009,,FALSE,No,Child has sibling in school (SC only),Not applicable,"SC,PR"
+2A(1),2A,Phase 2A(1) - Alumni/Staff,Phase 2A (merged),2009,2021,TRUE,If oversubscribed,"Alumni parent/sibling, SAC, staff",Distance tiebreaker within citizenship group,"SC,PR"
+2A(2),2A(2),Phase 2A(2) - MOE Kindergarten,Phase 2A(2) - MOE Kindergarten,2009,2021,TRUE,If oversubscribed,MOE Kindergarten,Distance tiebreaker within citizenship group,"SC,PR"
+2A,2A,Phase 2A (merged),Phase 2A (merged),2022,,TRUE,If oversubscribed,"Alumni parent/sibling, SAC, staff, MOE Kindergarten",Distance tiebreaker within citizenship group,"SC,PR"
+2B,2B,Phase 2B,Phase 2B,2009,,TRUE,Yes (20 reserved places),"Volunteer parent (40h), church/clan, community leaders",Distance priority within citizenship group,"SC,PR"
+2C,2C,Phase 2C,Phase 2C,2009,,TRUE,Yes (40 reserved places),All SC and PR children,Yes: 1km > 1–2km > beyond 2km. SC > PR within each band,"SC,PR"
+2C(S),2C(S),Phase 2C Supplementary,Phase 2C Supplementary,2009,,TRUE,MOE may assign,For those unsuccessful SC/PR in Phase 2C,Distance priority still applies; MOE assigns to nearest school with vacancies if needed.,"SC,PR"
+3,3,Phase 3 - International,Phase 3 - International,2009,,TRUE,Subject to vacancies,International students,Not a key factor; vacancies depend on what is left.,"non-SC,non-PR"

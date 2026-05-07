@@ -6,7 +6,7 @@
 5,PR1-2,Permanent Residents living between 1km and 2km of the school,Subject to PR cap and remaining capacity,TRUE
 6,PR>2,Permanent Residents living outside 2km of the school,Lowest priority — rarely reached at popular schools,TRUE
 7,SC<1#,"Singapore Citizens living within 1km of the school all admitted, with no leftover",,FALSE
-8,SC1-2#,"Singapore Citizens living between 1km and 2km of the school all admitted, with no leftover",,FALSE
-9,SC>2#,"Singapore Citizens living outside 2km of the school all admitted, with no leftover for Permanent Residents",,FALSE
+8,SC<2#,"Singapore Citizens living between 1km and 2km of the school all admitted, with no leftover",,FALSE
+9,SC#,"Singapore Citizens living outside 2km of the school all admitted, with no leftover for Permanent Residents",,FALSE
 10,PR<1#,"Permanent Residents living within 1km of the school all admitted, with no leftover",,FALSE
-11,PR1-2#,"Permanent Residents living between 1km and 2km of the school all admitted, with no leftover",,FALSE
+11,PR<2#,"Permanent Residents living between 1km and 2km of the school all admitted, with no leftover",,FALSE

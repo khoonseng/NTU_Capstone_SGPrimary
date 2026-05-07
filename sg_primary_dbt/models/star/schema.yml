@@ -10,14 +10,8 @@ models:
           - unique
           - not_null
 
-      - name: school_name
+      - name: school_name_clean
         description: "The name of each school"
-        tests:
-          - unique
-          - not_null
-
-      - name: url_address
-        description: "The website of each school"
         tests:
           - unique
           - not_null
@@ -25,11 +19,123 @@ models:
       - name: address
         description: "The address of each school"
         tests:
-          - not_null
+          - not_null:
+              where: school_status != 'merged'
 
       - name: postal_code
         description: "The postal code of each school"
         tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: dgp_code
+        description: "The development guide plan code of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: zone_code
+        description: "The zone code of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: type_code
+        description: "The type of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: nature_code
+        description: "The nature of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: session_code
+        description: "The cirriculum session of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: mainlevel_code
+        description: "The education level of each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: sap_ind
+        description: "Indicator to represent if a school offers Special Assistance Plan"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: autonomous_ind
+        description: "Indicator to represent if a school is autonomous to introduce special programmes"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: gifted_ind
+        description: "Indicator to represent if a school offers gifted education programmes "
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: ip_ind
+        description: "Indicator to represent if a school offers integrated programme"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+          
+      - name: mothertongue1_code
+        description: "The first mother tongue offered in each school"
+        tests:
+          - not_null:
+              where: school_status != 'merged'
+                    
+      - name: mothertongue2_code
+        description: "The second mother tongue offered in each school"
+        # tests:
+          # - not_null
+                    
+      - name: mothertongue3_code
+        description: "The third mother tongue offered in each school"
+        # tests:
+          # - not_null
+
+      - name: school_status
+        tests:
+          - not_null
+          - relationships:
+              to: ref('school_statuses')
+              field: school_status
+              
+      - name: is_active
+        tests:
+          - not_null
+
+  - name: dim_school_generalinfo
+    columns:
+      - name: school_key
+        description: "The primary key (surrogate key) for this table"
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_school')
+              field: school_key
+
+      - name: url_address
+        description: "The website of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: email_address
+        description: "The email address of each school"
+        tests:
+          - unique
           - not_null
 
       - name: telephone_no
@@ -51,12 +157,6 @@ models:
         description: "The secondary fax number of each school"
         # tests:
           # - not_null
-
-      - name: email_address
-        description: "The email address of each school"
-        tests:
-          - unique
-          - not_null
           
       - name: mrt_desc
         description: "The closest MRT stations of each school"
@@ -102,68 +202,35 @@ models:
         description: "The sixth vice-principal of each school"
         # tests:
           # - not_null
-          
-      - name: dgp_code
-        description: "The development guide plan code of each school"
+
+  - name: fact_balloting
+    columns:
+      - name: balloting_key
+        tests:
+          - unique
+          - not_null
+
+      - name: school_key
         tests:
           - not_null
-          
-      - name: zone_code
-        description: "The zone code of each school"
+          - relationships:
+              to: ref('dim_school')
+              field: school_key
+
+      - name: taken
+        tests:
+          - not_null:
+              where: applied is not null
+
+      - name: phase_normalised
         tests:
           - not_null
-          
-      - name: type_code
-        description: "The type of each school"
+          - relationships:
+              to: ref('phases')
+              field: phase_normalised
+
+      - name: ballot_scenario_code
         tests:
-          - not_null
-          
-      - name: nature_code
-        description: "The nature of each school"
-        tests:
-          - not_null
-          
-      - name: session_code
-        description: "The cirriculum session of each school"
-        tests:
-          - not_null
-          
-      - name: mainlevel_code
-        description: "The education level of each school"
-        tests:
-          - not_null
-          
-      - name: sap_ind
-        description: "Indicator to represent if a school offers Special Assistance Plan"
-        tests:
-          - not_null
-          
-      - name: autonomous_ind
-        description: "Indicator to represent if a school is autonomous to introduce special programmes"
-        tests:
-          - not_null
-          
-      - name: gifted_ind
-        description: "Indicator to represent if a school offers gifted education programmes "
-        tests:
-          - not_null
-          
-      - name: ip_ind
-        description: "Indicator to represent if a school offers integrated programme"
-        tests:
-          - not_null
-          
-      - name: mothertongue1_code
-        description: "The first mother tongue offered in each school"
-        tests:
-          - not_null
-                    
-      - name: mothertongue2_code
-        description: "The second mother tongue offered in each school"
-        # tests:
-          # - not_null
-                    
-      - name: mothertongue3_code
-        description: "The third mother tongue offered in each school"
-        # tests:
-          # - not_null
+          - relationships:
+              to: ref('balloting_codes')
+              field: codes              
