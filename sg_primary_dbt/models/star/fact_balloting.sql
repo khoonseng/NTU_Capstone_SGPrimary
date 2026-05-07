@@ -18,18 +18,7 @@ WITH balloting AS (
 schools AS (
     SELECT 
         school_key, 
-        school_name_clean, 
-        school_status,
-        CASE
-            WHEN is_active
-            THEN 'School is active for enrollment'
-            WHEN NOT is_active AND school_status = 'merged'
-            THEN 'School is not for enrollment. It was merged under ' || merged_into || ' on ' || inactive_from_year
-            WHEN NOT is_active AND school_status = 'relocated_gap'
-            THEN 'School is not for enrollment. Enrollment was ceased in ' || inactive_from_year || ' and will be reopened in ' || (inactive_to_year + 1)
-            ELSE 'Unknown status'
-        END AS school_status_description,
-        is_active
+        school_name_clean
     FROM {{ ref('dim_school') }}
 ),
 
@@ -43,12 +32,8 @@ joined AS (
 
         s.school_key,
         b.school_name_clean,
-        s.school_status,
-        s.school_status_description,
-        s.is_active,
         b.phase_normalised,
         b.phase_raw,
-        -- b.is_competitive,
         b.registration_year,
         b.total_vacancy,
         b.vacancy,

@@ -32,7 +32,7 @@ joined AS (
         l.inactive_from_year,
         l.inactive_to_year,
         l.merged_into,
-
+        
         -- is_active is computed dynamically against current year
         -- so it self-updates without seed file changes when
         -- a relocated school resumes intake
@@ -58,7 +58,17 @@ joined AS (
 final as (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['school_name_clean']) }} AS school_key,
-        *
+        *,
+
+        CASE
+            WHEN is_active
+            THEN 'School is active for enrollment'
+            WHEN NOT is_active AND school_status = 'merged'
+            THEN 'School is not for enrollment. It was merged under ' || merged_into || ' on ' || inactive_from_year
+            WHEN NOT is_active AND school_status = 'relocated_gap'
+            THEN 'School is not for enrollment. Enrollment was ceased in ' || inactive_from_year || ' and will be reopened in ' || (inactive_to_year + 1)
+            ELSE 'Unknown status'
+        END AS school_status_description
     FROM joined        
 )
 
