@@ -166,9 +166,7 @@ school_totals AS (
 --   when MOE adjusts intakes mid-exercise.
 --
 -- is_over_enrolled:
---   TRUE when taken > vacancy. Analytical signal for popular schools that
---   consistently fill beyond declared capacity in early phases.
---   NULL when vacancy is unknown (has_full_figures=FALSE).
+--   TRUE when total taken > total vacancy.
 -- ---------------------------------------------------------------------------
 final AS (
     SELECT
@@ -213,21 +211,6 @@ final AS (
             ELSE 
                 vacancy - taken
         END                                         AS remaining_places,
-
-        -- total_vacancy - SUM(taken) OVER (
-        --     PARTITION BY school_name_clean, registration_year
-        --     ORDER BY registration_year  -- stable ordering within school-year
-        --     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        -- )                                           AS remaining_places,
-
-        -- CASE
-        --     WHEN phase_normalised IN ('1', '2A(1)', '2A(2)', '2A') AND registration_year < 2019       
-        --         THEN NULL
-        --     WHEN vacancy IS NULL                    
-        --         THEN NULL
-        --     ELSE 
-        --         taken > vacancy
-        -- END                                         AS is_over_enrolled,
 
         CASE
             WHEN total_vacancy IS NULL              THEN NULL

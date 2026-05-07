@@ -60,7 +60,7 @@ seeds:
           - unique
           - not_null
 
-  - name: school_status
+  - name: school_statuses
     description: "Lookup table for school status codes and descriptions."
     columns:
       - name: school_status
