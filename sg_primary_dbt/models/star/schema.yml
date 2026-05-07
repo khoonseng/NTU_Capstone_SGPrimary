@@ -16,12 +16,6 @@ models:
           - unique
           - not_null
 
-      - name: url_address
-        description: "The website of each school"
-        tests:
-          - unique
-          - not_null
-
       - name: address
         description: "The address of each school"
         tests:
@@ -31,77 +25,6 @@ models:
         description: "The postal code of each school"
         tests:
           - not_null
-
-      - name: telephone_no
-        description: "The main telephone number of each school"
-        tests:
-          - not_null
-
-      - name: telephone_no_2
-        description: "The secondary telephone number of each school"
-        # tests:
-          # - not_null
-          
-      - name: fax_no
-        description: "The main fax number of each school"
-        # tests:
-          # - not_null
-
-      - name: fax_no_2
-        description: "The secondary fax number of each school"
-        # tests:
-          # - not_null
-
-      - name: email_address
-        description: "The email address of each school"
-        tests:
-          - unique
-          - not_null
-          
-      - name: mrt_desc
-        description: "The closest MRT stations of each school"
-        # tests:
-          # - not_null
-          
-      - name: bus_desc
-        description: "The available buses of each school"
-        # tests:
-          # - not_null
-          
-      - name: principal_name
-        description: "The principal of each school"
-        tests:
-          - not_null
-          
-      - name: first_vp_name
-        description: "The first vice-principal of each school"
-        tests:
-          - not_null
-          
-      - name: second_vp_name
-        description: "The second vice-principal of each school"
-        # tests:
-          # - not_null
-          
-      - name: third_vp_name
-        description: "The third vice-principal of each school"
-        # tests:
-          # - not_null
-          
-      - name: fourth_vp_name
-        description: "The fourth vice-principal of each school"
-        # tests:
-          # - not_null
-          
-      - name: fifth_vp_name
-        description: "The fifth vice-principal of each school"
-        # tests:
-          # - not_null
-          
-      - name: sixth_vp_name
-        description: "The sixth vice-principal of each school"
-        # tests:
-          # - not_null
           
       - name: dgp_code
         description: "The development guide plan code of each school"
@@ -165,5 +88,99 @@ models:
                     
       - name: mothertongue3_code
         description: "The third mother tongue offered in each school"
+        # tests:
+          # - not_null
+
+  - name: dim_school_generalinfo
+    columns:
+      - name: school_key
+        description: "The primary key (surrogate key) for this table"
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_school')
+              field: school_key
+
+      - name: school_name_clean
+        description: "The name of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: url_address
+        description: "The website of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: email_address
+        description: "The email address of each school"
+        tests:
+          - unique
+          - not_null
+
+      - name: telephone_no
+        description: "The main telephone number of each school"
+        tests:
+          - not_null
+
+      - name: telephone_no_2
+        description: "The secondary telephone number of each school"
+        # tests:
+          # - not_null
+          
+      - name: fax_no
+        description: "The main fax number of each school"
+        # tests:
+          # - not_null
+
+      - name: fax_no_2
+        description: "The secondary fax number of each school"
+        # tests:
+          # - not_null
+          
+      - name: mrt_desc
+        description: "The closest MRT stations of each school"
+        # tests:
+          # - not_null
+          
+      - name: bus_desc
+        description: "The available buses of each school"
+        # tests:
+          # - not_null
+          
+      - name: principal_name
+        description: "The principal of each school"
+        tests:
+          - not_null
+          
+      - name: first_vp_name
+        description: "The first vice-principal of each school"
+        tests:
+          - not_null
+          
+      - name: second_vp_name
+        description: "The second vice-principal of each school"
+        # tests:
+          # - not_null
+          
+      - name: third_vp_name
+        description: "The third vice-principal of each school"
+        # tests:
+          # - not_null
+          
+      - name: fourth_vp_name
+        description: "The fourth vice-principal of each school"
+        # tests:
+          # - not_null
+          
+      - name: fifth_vp_name
+        description: "The fifth vice-principal of each school"
+        # tests:
+          # - not_null
+          
+      - name: sixth_vp_name
+        description: "The sixth vice-principal of each school"
         # tests:
           # - not_null
