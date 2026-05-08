@@ -234,3 +234,32 @@ models:
           - relationships:
               to: ref('balloting_codes')
               field: codes              
+
+  - name: mart_school_analysis
+    columns:
+      - name: analysis_key
+        tests:
+          - unique
+          - not_null
+
+      - name: school_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_school')
+              field: school_key
+
+      - name: phase_normalised
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['2B', '2C', '2C(S)', '3']
+
+      - name: registration_year
+        tests:
+          - not_null
+
+      - name: ballot_risk_level
+        tests:
+          - accepted_values:
+              values: ['HIGH', 'MEDIUM', 'LOW']
