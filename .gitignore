@@ -220,3 +220,6 @@ __marimo__/
 
 # secrets
 keys/
+
+# connections
+sg_primary_dbt/profiles.yml
