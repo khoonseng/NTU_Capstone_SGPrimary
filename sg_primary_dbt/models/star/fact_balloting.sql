@@ -6,7 +6,7 @@
       "data_type": "int64",
       "range": {"start": 2009, "end": 2051, "interval": 1}
     },
-    cluster_by=["school_key", "phase_normalised"]
+    cluster_by=["school_name_clean", "phase_normalised"]
   )
 }}
 
