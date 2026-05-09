@@ -104,21 +104,29 @@ It is also a portfolio project built during the **NTU SCTP Data Science and AI p
 
 ## Data Sources
 
-### 1. data.gov.sg API — School Metadata
-- **Dataset ID:** `d_688b934f82c1059ed0a6993d2a829089`
-- **Content:** General information of schools — name, address, postal code, type, SAP/autonomous/gifted/IP indicators, mother tongue, zone, principal details
+### 1. data.gov.sg — School Metadata
+- **Dataset:** [General Information of Schools](https://data.gov.sg/datasets?topics=education&query=primary+&resultId=d_688b934f82c1059ed0a6993d2a829089)
+- **Provider:** Singapore Government, data.gov.sg
+- **Content:** General information of schools - School name, address, postal code, type (government/government-aided), SAP/autonomous gifted/IP indicators, mother tongue, zone, principal and VP details
 - **Ingestion:** Python script (`scripts/load_schools_data.py`) via API call
 - **Update frequency:** Annual — re-run script when MOE updates school metadata
 - **Raw table:** `sg_moe.raw_schools`
 - **File format in GCS:** CSV (one file per extraction date, with the latest being loaded into raw table)
+- **Licence:** Singapore Open Data Licence 1.0
 
-### 2. sgschooling.com — P1 Balloting History
-- **URL pattern:** `https://sgschooling.com/year/{year}/all`
-- **Content:** Per-school, per-phase balloting results including vacancy, applied, taken, and ballot scenario details
+### 2. sgschooling.com — P1 Balloting History *(primary source)*
+- **Website:** [sgschooling.com](https://sgschooling.com) — built and maintained by **Junda Ong**, a Singaporean parent who created the site in 2019 while preparing for his own child's P1 registration
+- **Content:** Per-school, per-phase P1 balloting results — vacancy, applied, taken, ballot scenarios and ballot chance statistics
 - **Years covered:** 2009–2025 (17 years)
-- **Ingestion:** Python scraper (`scripts/scrape_sgschooling.py`) using BeautifulSoup
-- **Raw table:** `sg_moe.raw_sgschooling_balloting` (range-partitioned by `registration_year`)
+- **Ingestion:** Python scraper (`scripts/scrape_sgschooling.py`) using BeautifulSoup with polite request intervals
+- **Raw table:** `sg_moe.raw_sgschooling_balloting`
 - **File format in GCS:** Parquet (one file per year)
+- **Attribution:** All balloting history data is sourced from sgschooling.com, which in turn sources from MOE's published P1 registration results. This project uses the data with permission from the site creator. For the most current and up-to-date balloting information, please visit [sgschooling.com](https://sgschooling.com) directly.
+
+> **Note:** No official API exists for P1 balloting data on data.gov.sg. 
+> sgschooling.com is the most comprehensive third-party aggregator of this 
+> data, covering 17 years of history in a consistent, structured format. 
+> Four potential sources were evaluated for the full comparison.
 
 #### Why sgschooling.com as the sole balloting source
 
@@ -149,6 +157,7 @@ With the MOE and balloting data, certain data issues were observed in the follow
 #### (4) School Lifecycle — Mergers and Relocations
 - Several primary schools have ceased or temporarily suspended P1 registration due to mergers or subjected to relocations.
 
+<br/>
 These 4 key design decisions are documented here - ([Key Design Decisions](key_design.md)), along with other technical design considerations.
 
 ---
