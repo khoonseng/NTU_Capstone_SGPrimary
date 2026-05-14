@@ -263,3 +263,8 @@ models:
         tests:
           - accepted_values:
               values: ['HIGH', 'MEDIUM', 'LOW']
+
+      - name: is_current_year
+        description: "True if registration_year equals the current calendar year. Computed dynamically against CURRENT_DATE() — self-updates without code changes. Used by API and ML training to exclude partial current year data from historical trend analysis."
+        tests:
+          - not_null

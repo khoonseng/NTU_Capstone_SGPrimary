@@ -323,6 +323,7 @@ final AS (
         inactive_to_year,
         merged_into,
         school_status_description,
+        EXTRACT(YEAR FROM CURRENT_DATE()) = registration_year AS is_current_year,
 
         -- ── Registration figures ─────────────────────────────────────────────
         total_vacancy,
