@@ -7,6 +7,9 @@
 [![dbt](https://img.shields.io/badge/dbt-BigQuery-orange)](https://www.getdbt.com/)
 [![BigQuery](https://img.shields.io/badge/Google-BigQuery-4285F4)](https://cloud.google.com/bigquery)
 [![GCS](https://img.shields.io/badge/Google-Cloud%20Storage-4285F4)](https://cloud.google.com/storage)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-29.4-2496ED)](https://www.docker.com/)
+[![Cloud Run](https://img.shields.io/badge/Google-Cloud%20Run-4285F4)](https://cloud.google.com/run)
 
 ---
 
@@ -20,7 +23,7 @@
 - [Repository Structure](#repository-structure)
 - [Known Limitations](#known-limitations)
 - [Roadmap](#roadmap)
-- [Setup Guide](setup_guide.md)
+- [Setup Guide](#setup-guide)
 
 ---
 
@@ -94,10 +97,20 @@ It is also a portfolio project built during the **NTU SCTP Data Science and AI p
                                         │
                            ┌────────────┴────────────┐
                            ▼                         ▼
-                    FastAPI (Week 2)         ML Model (Week 3-4)
-                    /schools                 Ballot probability
-                    /recommend               Subscription rate
-                    /predict                 prediction for 2026
+                        FastAPI               ML Model (Week 3-4)
+                        /health               Ballot probability
+                        /schools              Subscription rate
+                        /recommend            prediction for 2026
+                        /predict
+                           │
+                           ▼
+                    Docker Container
+                    (Google Artifact Registry)
+                           │
+                           ▼
+                    Google Cloud Run
+                    (us-central1, serverless)
+                    Public API endpoint
 ```
 
 ---
@@ -162,6 +175,67 @@ These 4 key design decisions are documented here - ([Key Design Decisions](key_d
 
 ---
 
+## API Endpoints
+
+The SGPrimary API is built with FastAPI and deployed on Google Cloud Run.
+
+**Base URL:** `{YOUR_CLOUD_RUN_URL}`
+
+**Interactive docs:** `{base_url}/docs`
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/health` | GET | Liveness check — returns API version and status |
+| `/schools` | GET | Returns active primary schools with optional attribute filters |
+| `/recommend` | GET | Returns school recommendations based on location, phase, and balloting history |
+| `/predict` | GET | Returns ballot risk assessment for a specific school and phase |
+
+### `/schools` Query Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `zone_code` | string | No | Filter by zone: NORTH, SOUTH, EAST, WEST |
+| `dgp_code` | string | No | Filter by estate e.g. ADMIRALTY |
+| `type_code` | string | No | Filter by school type e.g. GOVERNMENT, GOVERNMENT-AIDED |
+| `nature_code` | string | No | Filter by school nature e.g. CO-ED, BOYS, GIRLS |
+| `sap_ind` | boolean | No | SAP school indicator |
+| `autonomous_ind` | boolean | No | Autonomous school indicator |
+| `gifted_ind` | boolean | No | Gifted programme indicator |
+| `ip_ind` | boolean | No | Integrated Programme indicator |
+
+### `/recommend` Query Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `zone_code` | string | At least one of zone_code or dgp_code | Filter by zone |
+| `dgp_code` | string | At least one of zone_code or dgp_code | Filter by estate |
+| `phase` | string | No | Phase: 2B, 2C, 2C(S), 3. If omitted, returns all phases with most recent year only |
+| `has_balloting_3yr` | boolean | No | Requires phase. true = balloted in last 3 years, false = did not ballot |
+| `type_code` | string | No | Filter by school type |
+| `nature_code` | string | No | Filter by school nature |
+| `sap_ind` | boolean | No | SAP school indicator |
+| `autonomous_ind` | boolean | No | Autonomous school indicator |
+| `gifted_ind` | boolean | No | Gifted programme indicator |
+| `ip_ind` | boolean | No | Integrated Programme indicator |
+
+### `/predict` Query Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `school_name` | string | Yes | Full school name e.g. ADMIRALTY PRIMARY SCHOOL |
+| `phase` | string | Yes | Phase: 2B, 2C, 2C(S), 3 |
+
+### Response Modes for `/recommend`
+
+**Mode 1 — No phase selected:**
+Returns all phases for matching schools. Each phase shows the most recent completed year plus the current year (2026) if registration data is available.
+
+**Mode 2 — Phase selected:**
+Returns the selected phase for matching schools with the last 3 completed years of history, trend features (`subscription_rate_3yr_avg`, `ballot_occurrences_last_3yr` etc.), and `reference_years` showing the exact years used for trend computation.
+
+
+---
+
 ## Repository Structure
 
 ```
@@ -193,6 +267,26 @@ NTU_Capstone_SGPrimary/
 │       ├── school_lifecycle.csv
 │       ├── school_name_mapping.csv
 │       └── school_statuses.csv
+├── api/
+│   ├── main.py                    # FastAPI app entry point, global exception handlers
+│   ├── config.py                  # Settings via pydantic-settings, BigQuery client init
+│   ├── constants.py               # Shared constants e.g. VALID_PHASES
+│   ├── Dockerfile                 # Container definition for Cloud Run deployment
+│   ├── requirements.txt           # API-specific Python dependencies
+│   ├── routers/
+│   │   ├── schools.py             # GET /schools
+│   │   ├── recommend.py           # GET /recommend
+│   │   └── predict.py             # GET /predict
+│   ├── models/
+│   │   ├── schools.py             # Pydantic response models for /schools
+│   │   ├── recommend.py           # Pydantic response models for /recommend
+│   │   └── predict.py             # Pydantic response models for /predict
+│   ├── services/
+│   │   ├── bigquery.py            # Shared BigQuery query execution helper
+│   │   ├── recommend.py           # Business logic for /recommend
+│   │   └── predict.py             # Business logic for /predict
+│   └── postman/
+│       └── SGPrimary_API.postman_collection.json
 └── README.md
 ```
 
@@ -237,6 +331,8 @@ dim_school_generalinfo                     │
 | Pre-2015 data should be treated with lower confidence for ML training | Older demand patterns may not predict 2026 behaviour | Consider year-weighting when training prediction model |
 | 2021–2022 data may reflect COVID anomalies | Subscription rates may be atypically low | Flag these years when evaluating trend features |
 | OneMap API integration for distance calculation not yet implemented | Parents currently select distance band manually | Planned for future iterations — will compute actual distances from postal code |
+| Phases 1 and 2A excluded from /recommend and /predict | Parents with Phase 1 siblings or Phase 2A alumni connections cannot use ballot prediction | Planned for future iteration |
+| `/predict` uses heuristic risk assessment only | ballot_risk_level is rule-based, not ML-predicted | ML model planned for Week 3 |
 
 ---
 
@@ -245,9 +341,15 @@ dim_school_generalinfo                     │
 | Week | Focus | Status |
 |---|---|---|
 | Week 1 | Data foundation — ingestion, BigQuery, dbt pipeline | ✅ Complete |
-| Week 2 | FastAPI — `/schools`, `/recommend`, `/predict` endpoints. Cloud Run deployment | 🔜 Upcoming |
+| Week 2 | FastAPI — `/health`, `/schools`, `/recommend`, `/predict` endpoints. Docker + Cloud Run deployment | ✅ Complete |
 | Week 3 | ML model — ballot probability and subscription rate prediction for 2026 | 🔜 Upcoming |
 | Week 4 | RAG layer — ChromaDB vector store, LLM-powered school advice, frontend | 🔜 Upcoming |
+
+---
+
+##  Setup Guide
+- For Data Pipeline instructions, see [here](./setup_guide_data_pipeline.md)
+- For API local development and Cloud Run deployment instructions, see [here](./setup_guide_api.md).
 
 ---
 
