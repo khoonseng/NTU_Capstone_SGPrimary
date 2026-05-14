@@ -1,0 +1,443 @@
+{
+  "info": {
+    "_postman_id": "109e5a6b-7438-4490-a9c1-3fec6c81f95d",
+    "name": "SGPrimary API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "679005"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Liveness check. Returns API version and status.  \nExpected: 200 {\"status\": \"ok\", \"version\": \"0.1.0\"}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schools",
+      "item": [
+        {
+          "name": "Get All Active Schools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Returns all active primary schools with stable attributes.  \nNo filters applied — full list.  \nExpected: 200 with count in the hundreds."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Schools by Zone",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Schools by DGP Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "description": "Returns active schools in the Admiralty estate.  \nExpected: 200 with a list of schools."
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Schools By Indicators",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/schools?sap_ind=true&gifted_ind=true&autonomous_ind=false&ip_ind=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "schools"
+              ],
+              "query": [
+                {
+                  "key": "sap_ind",
+                  "value": "true"
+                },
+                {
+                  "key": "gifted_ind",
+                  "value": "true"
+                },
+                {
+                  "key": "autonomous_ind",
+                  "value": "false"
+                },
+                {
+                  "key": "ip_ind",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Predict",
+      "item": [
+        {
+          "name": "422 - Invalid Phase",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/predict?school_name=SPRINGDALTE PRIMARY SCHOOL&phase=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "predict"
+              ],
+              "query": [
+                {
+                  "key": "school_name",
+                  "value": "SPRINGDALTE PRIMARY SCHOOL"
+                },
+                {
+                  "key": "phase",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Validates that phases 1 and 2A are out of scope.  \nExpected: 422 with message explaining supported phases are 2B, 2C, 2C(S), 3."
+          },
+          "response": []
+        },
+        {
+          "name": "404 - School Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/predict?school_name=SPRINGDALTE PRIMARY SCHOOL&phase=2C",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "predict"
+              ],
+              "query": [
+                {
+                  "key": "school_name",
+                  "value": "SPRINGDALTE PRIMARY SCHOOL"
+                },
+                {
+                  "key": "phase",
+                  "value": "2C"
+                }
+              ]
+            },
+            "description": "Validates 404 handling for unknown school names.  \nExpected: 404 with message to check school name matches exactly."
+          },
+          "response": []
+        },
+        {
+          "name": "Predict - Active School",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/predict?school_name=SPRINGDALE PRIMARY SCHOOL&phase=2C",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "predict"
+              ],
+              "query": [
+                {
+                  "key": "school_name",
+                  "value": "SPRINGDALE PRIMARY SCHOOL"
+                },
+                {
+                  "key": "phase",
+                  "value": "2C"
+                }
+              ]
+            },
+            "description": "Returns ballot risk assessment for an active school.  \nExpected: 200 with is_active=true, ballot_risk_level populated,  \nrisk_explanation templated string, 3 historical years in history block."
+          },
+          "response": []
+        },
+        {
+          "name": "Predict - Inactive School (Merged)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/predict?school_name=STAMFORD PRIMARY SCHOOL&phase=2C",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "predict"
+              ],
+              "query": [
+                {
+                  "key": "school_name",
+                  "value": "STAMFORD PRIMARY SCHOOL"
+                },
+                {
+                  "key": "phase",
+                  "value": "2C"
+                }
+              ]
+            },
+            "description": "Returns historical ballot data for a merged school.  \nExpected: 200 with is_active=false, school_status=merged,  \nschool_status_description explaining merger context.  \nDemonstrates that /predict surfaces inactive school history."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommend",
+      "item": [
+        {
+          "name": "Missing Location (422 Validation)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend"
+              ]
+            },
+            "description": "Validates that at least one of zone_code or dgp_code is required.  \nExpected: 422 with error message about missing location."
+          },
+          "response": []
+        },
+        {
+          "name": "has_balloting_3yr Without Phase (422 Validation)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend?zone_code=NORTH&has_balloting_3yr=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend"
+              ],
+              "query": [
+                {
+                  "key": "zone_code",
+                  "value": "NORTH",
+                  "type": "text"
+                },
+                {
+                  "key": "has_balloting_3yr",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "Validates that phase is required when has_balloting_3yr is provided.  \nExpected: 422 with error message about missing phase."
+          },
+          "response": []
+        },
+        {
+          "name": "Mode 1 - All Phases, Most Recent Year",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend?zone_code=NORTH&dgp_code=SENG KANG",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend"
+              ],
+              "query": [
+                {
+                  "key": "zone_code",
+                  "value": "NORTH",
+                  "type": "text"
+                },
+                {
+                  "key": "dgp_code",
+                  "value": "SENG KANG",
+                  "type": "text"
+                },
+                {
+                  "key": "type_code",
+                  "value": "GOVERNMENT-AIDED SCH",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "nature_code",
+                  "value": "CO-ED SCHOOL",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sap_ind",
+                  "value": "false",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Mode 1 — no phase selected. Returns all phases for matching schools,  \nmost recent completed year + 2026 null sentinel per phase.  \nzone_code and dgp_code combined for narrower results.  \nOptional attribute filters included but disabled — enable to narrow results.  \nExpected: 200 with schools in Seng Kang area, 4 phases each, 2 years per phase."
+          },
+          "response": []
+        },
+        {
+          "name": "Mode 2 - Phase Selected with Trend Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend?zone_code=NORTH&dgp_code=SENG KANG&phase=2C",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend"
+              ],
+              "query": [
+                {
+                  "key": "zone_code",
+                  "value": "NORTH"
+                },
+                {
+                  "key": "dgp_code",
+                  "value": "SENG KANG"
+                },
+                {
+                  "key": "type_code",
+                  "value": "GOVERNMENT-AIDED SCH",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "nature_code",
+                  "value": "CO-ED SCHOOL",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sap_ind",
+                  "value": "false",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "phase",
+                  "value": "2C",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "Mode 2 — phase selected. Returns last 3 completed years + 2026 null  \nsentinel with trend data and reference_years per school.  \nhas_balloting_3yr disabled — returns all schools regardless of balloting history.  \nEnable has_balloting_3yr to filter by recent balloting trend.  \nExpected: 200 with North zone schools for Phase 2C, trend block populated."
+          },
+          "response": []
+        },
+        {
+          "name": "Mode 2 - Phase + has_balloting_3yr Filter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/recommend?zone_code=NORTH&dgp_code=SENG KANG&phase=2C",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "recommend"
+              ],
+              "query": [
+                {
+                  "key": "zone_code",
+                  "value": "NORTH"
+                },
+                {
+                  "key": "dgp_code",
+                  "value": "SENG KANG"
+                },
+                {
+                  "key": "type_code",
+                  "value": "GOVERNMENT-AIDED SCH",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "nature_code",
+                  "value": "CO-ED SCHOOL",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "sap_ind",
+                  "value": "false",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "phase",
+                  "value": "2C",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "Mode 2 with balloting filter — returns only schools where the most  \nrecent completed year has ballot_occurrences_last_3yr > 0.  \nExpected: 200 with subset of Request 4 results.  \nVerify: count(Request 5 true) + count(has_balloting_3yr=false) = count(Request 4)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
