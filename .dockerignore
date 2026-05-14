@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Environments
+.env
+.venv
+env/
+venv/
+*.yml
+!api/requirements.txt
+
+# GCP keys — never include in Docker image
+keys/
+
+# dbt — not needed in the API container
+sg_primary_dbt/
+logs/
+
+# Scripts — not needed in the API container
+scripts/
+test_gcp.py
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.md
+.DS_Store
