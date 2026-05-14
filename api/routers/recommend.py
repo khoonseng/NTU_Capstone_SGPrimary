@@ -10,10 +10,12 @@ Two response modes:
 
 Validation rules enforced here before any BigQuery queries are made:
   - At least one of zone_code or dgp_code must be provided
+  - phase must be one of VALID_PHASES when provided
   - has_balloting_3yr requires phase to be provided
 """
 
 from fastapi import APIRouter, Query, HTTPException
+from api.constants import VALID_PHASES
 from api.models.recommend import (
     RecommendResponseNoPhase,
     RecommendResponseWithPhase,
@@ -45,10 +47,26 @@ async def get_recommendations(
     # -----------------------------------------------------------------------
     # Validation — enforce location and parameter dependency rules
     # -----------------------------------------------------------------------
+    zone_code = zone_code.upper() if zone_code else None
+    dgp_code = dgp_code.upper() if dgp_code else None
+    phase = phase.upper() if phase else None
+    type_code = type_code.upper() if type_code else None
+    nature_code = nature_code.upper() if nature_code else None
+
     if not zone_code and not dgp_code:
         raise HTTPException(
             status_code=422,
             detail="At least one of zone_code or dgp_code must be provided."
+        )
+
+    if phase and phase not in VALID_PHASES:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Phase '{phase}' is not supported. "
+                f"Supported phases are: {', '.join(sorted(VALID_PHASES))}. "
+                f"Phases 1 and 2A are excluded from ballot analysis in this iteration."
+            )
         )
 
     if has_balloting_3yr is not None and not phase:

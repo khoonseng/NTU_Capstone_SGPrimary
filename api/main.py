@@ -5,6 +5,13 @@ FastAPI application entry point for the SGPrimary API.
 
 Registers all routers and defines global exception handlers
 to ensure consistent error response shapes across all endpoints.
+
+Error handling philosophy:
+  422 — validation errors: return clean detail for caller to act on
+  500 — unexpected errors: mask internal details, log full traceback
+        Full exception details are available in:
+          Local dev: uvicorn terminal output
+          Cloud Run: GCP Cloud Logging (Cloud Run → Logs tab)
 """
 
 from fastapi import FastAPI, Request
@@ -44,11 +51,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
+    # Full traceback is logged to terminal (local) or GCP Cloud Logging
+    # (Cloud Run) automatically by uvicorn — no need to include in response.
     return JSONResponse(
         status_code=500,
         content={
             "error": "Internal server error",
-            "detail": str(exc),
+            "detail": "An unexpected error occurred. Please try again later.",
         },
     )
 

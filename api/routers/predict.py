@@ -20,7 +20,8 @@ Validation:
 
 from fastapi import APIRouter, Query, HTTPException
 from api.models.predict import PredictResponse
-from api.services.predict import get_prediction, VALID_PHASES
+from api.services.predict import get_prediction
+from api.constants import VALID_PHASES
 
 router = APIRouter(prefix="/predict", tags=["Predict"])
 

@@ -22,9 +22,6 @@ from google.cloud import bigquery
 from api.services.bigquery import run_query, get_dataset
 
 
-VALID_PHASES = {"2B", "2C", "2C(S)", "3"}
-
-
 def _get_current_year() -> int:
     """
     Returns the current calendar year computed at call time.
