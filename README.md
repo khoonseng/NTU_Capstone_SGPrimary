@@ -170,8 +170,7 @@ With the MOE and balloting data, certain data issues were observed in the follow
 #### (4) School Lifecycle — Mergers and Relocations
 - Several primary schools have ceased or temporarily suspended P1 registration due to mergers or subjected to relocations.
 
-<br/>
-These 4 key design decisions are documented here - ([Key Design Decisions](key_design.md)), along with other technical design considerations.
+These 4 key design decisions are documented here ([Key Design Decisions](./key_design.md)), along with other technical design considerations.
 
 ---
 
