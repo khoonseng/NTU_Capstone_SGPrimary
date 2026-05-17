@@ -17,6 +17,7 @@ Error handling philosophy:
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import schools, recommend, predict
 
@@ -27,6 +28,18 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",           # Vite dev server
+        "http://localhost:4173",           # Vite preview server
+        "https://test-sg-moe.web.app",     # Firebase Hosting (primary)
+        "https://test-sg-moe.firebaseapp.com",  # Firebase Hosting (secondary)
+    ],
+    allow_methods=["GET"],                 # API is read-only
+    allow_headers=["*"],
+)
 
 # ---------------------------------------------------------------------------
 # Global exception handlers

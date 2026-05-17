@@ -223,3 +223,11 @@ keys/
 
 # connections
 sg_primary_dbt/profiles.yml
+
+# Frontend
+frontend/dist
+frontend/node_modules
+
+# Firebase
+firebase-debug.log
+.firebase/
