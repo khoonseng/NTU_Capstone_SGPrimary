@@ -20,7 +20,7 @@ flowchart TD
         NVM -->|installs| NODE
 
         subgraph FRONTEND["frontend/ — Vue Project"]
-            direction LR
+            direction TB
             VITE["Vite\nbuild toolchain"]
             VUE["Vue 3\ncomponent framework"]
             TW["Tailwind CSS\nutility styling"]
