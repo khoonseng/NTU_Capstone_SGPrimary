@@ -1,9 +1,10 @@
 # SGPrimary — Architecture Documentation
 
-This document covers two architecture perspectives:
+This document covers three architecture perspectives:
 
 1. [Full Stack Architecture](#1-full-stack-architecture) — how all components fit together end-to-end
 2. [Firebase Hosting — How the Vue App is Served](#2-firebase-hosting--how-the-vue-app-is-served) — the deploy and runtime journey in detail
+3. [Vue Project Structure](./vue_project_structure.md) — explains the frontend file structure, how the layers connect, and the runtime data flow
 
 ---
 
