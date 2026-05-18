@@ -7,11 +7,9 @@
       </h3>
       <span
         class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full"
-        :class="school.is_active
-          ? 'bg-green-100 text-green-700'
-          : 'bg-red-100 text-red-600'"
+        :class="statusBadgeClass"
       >
-        {{ school.is_active ? 'Active' : 'Inactive' }}
+        {{ statusBadgeLabel }}
       </span>
     </div>
 
@@ -47,10 +45,26 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   school: {
     type: Object,
     required: true,
   },
+})
+
+const statusBadgeClass = computed(() => {
+  if (props.school.is_active) return 'bg-green-100 text-green-700'
+  if (props.school.school_status === 'merged') return 'bg-red-100 text-red-600'
+  if (props.school.school_status === 'relocated_gap') return 'bg-amber-100 text-amber-700'
+  return 'bg-gray-100 text-gray-500'
+})
+
+const statusBadgeLabel = computed(() => {
+  if (props.school.is_active) return 'Active'
+  if (props.school.school_status === 'merged') return 'Merged'
+  if (props.school.school_status === 'relocated_gap') return 'Relocated'
+  return 'Inactive'
 })
 </script>

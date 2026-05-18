@@ -31,3 +31,12 @@
     </main>
   </div>
 </template>
+
+<script setup>
+import { onMounted } from 'vue'
+import { fetchMetadata } from './services/metadata'
+
+onMounted(() => {
+  fetchMetadata()
+})
+</script>

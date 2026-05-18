@@ -28,7 +28,8 @@ async def get_schools(
     sap_ind: bool | None = Query(default=None, description="Filter by SAP school indicator: true or false"),
     autonomous_ind: bool | None = Query(default=None, description="Filter by autonomous school indicator: true or false"),
     gifted_ind: bool | None = Query(default=None, description="Filter by gifted programme indicator: true or false"),
-    ip_ind: bool | None = Query(default=None, description="Filter by Integration Programme indicator: true or false")
+    ip_ind: bool | None = Query(default=None, description="Filter by Integration Programme indicator: true or false"),
+    is_active: bool | None = Query(default=True, description="Filter by active status: true for active schools, false for inactive")
 ):
 
     dataset = get_dataset()
@@ -40,8 +41,7 @@ async def get_schools(
     # ScalarQueryParameter. Using UPPER() on both sides of the comparison
     # ensures case-insensitive matching — a caller passing "north" matches
     # a stored value of "NORTH".
-    # ---------------------------------------------------------------------------
-    conditions = ["is_active = TRUE"]
+    conditions = []
     params = []
 
     if zone_code:
@@ -79,6 +79,10 @@ async def get_schools(
     if ip_ind is not None:
         conditions.append("ip_ind = @ip_ind")
         params.append(bigquery.ScalarQueryParameter("ip_ind", "BOOL", ip_ind))    
+
+    if is_active is not None:
+        conditions.append("is_active = @is_active")
+        params.append(bigquery.ScalarQueryParameter("is_active", "BOOL", is_active))
 
     where_clause = " AND ".join(conditions)
 
