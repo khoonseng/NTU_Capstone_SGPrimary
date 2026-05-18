@@ -13,3 +13,7 @@ and takes effect across all routers and services automatically.
 # guaranteed or semi-guaranteed entry and are not in scope for
 # ballot difficulty analysis in this iteration.
 VALID_PHASES = {"2B", "2C", "2C(S)", "3"}
+
+# Canonical zone display order — geographic rather than alphabetical.
+# Add new zones here if MOE introduces them in future years.
+ZONE_ORDER = ["NORTH", "SOUTH", "EAST", "WEST"]

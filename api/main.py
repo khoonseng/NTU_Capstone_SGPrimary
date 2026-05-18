@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import schools, recommend, predict
+from api.routers import schools, recommend, predict, metadata
 
 
 app = FastAPI(
@@ -82,6 +82,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 app.include_router(schools.router)
 app.include_router(recommend.router)
 app.include_router(predict.router)
+app.include_router(metadata.router)
 
 
 # ---------------------------------------------------------------------------
