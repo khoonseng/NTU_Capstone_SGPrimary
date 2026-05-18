@@ -92,23 +92,35 @@
         </div>
 
         <!-- Special programme toggles -->
-        <div class="flex flex-wrap gap-3 mb-4">
-          <label class="toggle-label">
-            <input type="checkbox" v-model="filters.sap_ind" class="mr-1.5" />
-            SAP
+        <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-3">
+          <label class="flex flex-col gap-0.5 cursor-pointer select-none">
+            <div class="flex items-center gap-1.5">
+              <input type="checkbox" v-model="filters.sap_ind" />
+              <span class="text-sm font-medium text-gray-700">SAP [Special Assistance Plan]</span>
+            </div>
+            <span class="text-xs text-gray-400 leading-snug">Higher Chinese curriculum alongside English</span>
           </label>
-          <label class="toggle-label">
-            <input type="checkbox" v-model="filters.autonomous_ind" class="mr-1.5" />
-            Autonomous
+          <label class="flex flex-col gap-0.5 cursor-pointer select-none">
+            <div class="flex items-center gap-1.5">
+              <input type="checkbox" v-model="filters.autonomous_ind" />
+              <span class="text-sm font-medium text-gray-700">Autonomous</span>
+            </div>
+            <span class="text-xs text-gray-400 leading-snug">Flexibility to introduce special programmes</span>
           </label>
-          <label class="toggle-label">
-            <input type="checkbox" v-model="filters.gifted_ind" class="mr-1.5" />
-            GEP
+          <label class="flex flex-col gap-0.5 cursor-pointer select-none">
+            <div class="flex items-center gap-1.5">
+              <input type="checkbox" v-model="filters.gifted_ind" />
+              <span class="text-sm font-medium text-gray-700">GEP [Gifted Education Programme]</span>
+            </div>
+            <span class="text-xs text-gray-400 leading-snug">For students identified as gifted in P3</span>
           </label>
-          <label class="toggle-label">
-            <input type="checkbox" v-model="filters.ip_ind" class="mr-1.5" />
-            IP
-          </label>
+          <!--label class="flex flex-col gap-0.5 cursor-pointer select-none">
+            <div class="flex items-center gap-1.5">
+              <input type="checkbox" v-model="filters.ip_ind" />
+              <span class="text-sm font-medium text-gray-700">IP [Integrated Programme]</span>
+            </div>
+            <span class="text-xs text-gray-400 leading-snug">6-year through-train to JC, skipping O-levels</span>
+          </label-->
         </div>
 
         <!-- Action buttons -->
@@ -207,7 +219,7 @@ const filters = reactive({
   sap_ind: false,
   autonomous_ind: false,
   gifted_ind: false,
-  ip_ind: false,
+  // ip_ind: false,
 })
 
 // ── Inactive schools state ──
@@ -237,7 +249,7 @@ function buildParams() {
   if (filters.sap_ind) params.sap_ind = true
   if (filters.autonomous_ind) params.autonomous_ind = true
   if (filters.gifted_ind) params.gifted_ind = true
-  if (filters.ip_ind) params.ip_ind = true
+  // if (filters.ip_ind) params.ip_ind = true
   return params
 }
 
@@ -267,7 +279,7 @@ function resetFilters() {
     sap_ind: false,
     autonomous_ind: false,
     gifted_ind: false,
-    ip_ind: false,
+    // ip_ind: false,
   })
   schools.value = []
   searched.value = false

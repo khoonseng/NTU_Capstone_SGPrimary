@@ -14,7 +14,7 @@
     </div>
 
     <!-- Attributes row -->
-    <div class="flex flex-wrap gap-2 mb-3">
+    <div v-if="hasAttributes" class="flex flex-wrap gap-2 mb-3">
       <span v-if="school.zone_code" class="badge bg-blue-50 text-blue-700">
         {{ school.zone_code }}
       </span>
@@ -34,7 +34,7 @@
       <span v-if="school.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
       <span v-if="school.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
       <span v-if="school.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
-      <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span>
+      <!-- <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
     </div>
 
     <!-- Inactive notice -->
@@ -66,5 +66,12 @@ const statusBadgeLabel = computed(() => {
   if (props.school.school_status === 'merged') return 'Merged'
   if (props.school.school_status === 'relocated_gap') return 'Relocated'
   return 'Inactive'
+})
+
+const hasAttributes = computed(() => {
+  const s = props.school
+  const meaningful = (val) => val && val !== 'UNKNOWN'
+  return meaningful(s.zone_code)
+    || meaningful(s.dgp_code)
 })
 </script>

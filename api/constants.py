@@ -17,3 +17,5 @@ VALID_PHASES = {"2B", "2C", "2C(S)", "3"}
 # Canonical zone display order — geographic rather than alphabetical.
 # Add new zones here if MOE introduces them in future years.
 ZONE_ORDER = ["NORTH", "SOUTH", "EAST", "WEST"]
+
+NATURE_ORDER = ["CO-ED SCHOOL", "BOYS' SCHOOL", "GIRLS' SCHOOL"]

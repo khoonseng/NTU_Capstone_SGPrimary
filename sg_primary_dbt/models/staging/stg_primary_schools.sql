@@ -19,7 +19,11 @@ select
     sixth_vp_name,
     dgp_code,
     zone_code,
-    type_code,
+    CASE 
+        WHEN type_code = 'GOVERNMENT-AIDED SCH'
+        THEN 'GOVERNMENT-AIDED SCHOOL'
+        ELSE type_code
+    END AS type_code,
     nature_code,
     session_code,
     mainlevel_code,

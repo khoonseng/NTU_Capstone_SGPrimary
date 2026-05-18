@@ -18,7 +18,7 @@ Query strategy:
 """
 
 from api.services.bigquery import run_query, get_dataset
-from api.constants import ZONE_ORDER
+from api.constants import ZONE_ORDER, NATURE_ORDER
 
 
 def get_metadata() -> dict:
@@ -50,7 +50,9 @@ def get_metadata() -> dict:
     zones = [z for z in ZONE_ORDER if z in zone_set]
     all_estates = sorted({r["dgp_code"] for r in rows if r["dgp_code"]})
     type_codes = sorted({r["type_code"] for r in rows if r.get("type_code")})
-    nature_codes = sorted({r["nature_code"] for r in rows if r.get("nature_code")})
+    # nature_codes = sorted({r["nature_code"] for r in rows if r.get("nature_code")})
+    nature_set = {r["nature_code"] for r in rows if r["nature_code"]}
+    nature_codes = [n for n in NATURE_ORDER if n in nature_set]
 
     estates_by_zone: dict[str, list[str]] = {}
     for zone in zones:
