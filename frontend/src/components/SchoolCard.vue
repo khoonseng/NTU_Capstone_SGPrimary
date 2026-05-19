@@ -1,77 +1,38 @@
 <template>
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-    <!-- School name and status -->
-    <div class="flex items-start justify-between gap-3 mb-3">
-      <h3 class="font-semibold text-gray-900 text-sm leading-snug">
-        {{ school.school_name }}
-      </h3>
-      <span
-        class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full"
-        :class="statusBadgeClass"
-      >
-        {{ statusBadgeLabel }}
-      </span>
-    </div>
+  <!-- Tappable card for active and relocated schools -->
+  <router-link
+    v-if="school.school_status !== 'merged'"
+    :to="`/schools/${encodeURIComponent(school.school_name)}`"
+    class="block bg-white rounded-xl border border-gray-200 shadow-sm p-5
+           hover:shadow-md hover:border-blue-200 transition-all"
+  >
+    <CardContent :school="school" />
+  </router-link>
 
-    <!-- Attributes row -->
-    <div v-if="hasAttributes" class="flex flex-wrap gap-2 mb-3">
-      <span v-if="school.zone_code" class="badge bg-blue-50 text-blue-700">
-        {{ school.zone_code }}
-      </span>
-      <span v-if="school.dgp_code" class="badge bg-gray-100 text-gray-600">
-        {{ school.dgp_code }}
-      </span>
-      <span v-if="school.type_code" class="badge bg-gray-100 text-gray-600">
-        {{ school.type_code }}
-      </span>
-      <span v-if="school.nature_code" class="badge bg-gray-100 text-gray-600">
-        {{ school.nature_code }}
-      </span>
+  <!-- Non-tappable card for merged schools -->
+  <div
+    v-else
+    class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+  >
+    <div class="p-5">
+      <CardContent :school="school" />
     </div>
-
-    <!-- Special indicators -->
-    <div class="flex flex-wrap gap-2">
-      <span v-if="school.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
-      <span v-if="school.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
-      <span v-if="school.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
-      <!-- <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
+    <!-- Disabled footer strip -->
+    <div class="px-5 py-2.5 bg-gray-50 border-t border-gray-200">
+      <p class="text-xs text-gray-400">
+        {{ school.school_status_description }}
+      </p>
     </div>
-
-    <!-- Inactive notice -->
-    <p v-if="!school.is_active" class="mt-3 text-xs text-gray-400 italic">
-      {{ school.school_status_description }}
-    </p>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import CardContent from './CardContent.vue'
 
-const props = defineProps({
+defineProps({
   school: {
     type: Object,
     required: true,
   },
-})
-
-const statusBadgeClass = computed(() => {
-  if (props.school.is_active) return 'bg-green-100 text-green-700'
-  if (props.school.school_status === 'merged') return 'bg-red-100 text-red-600'
-  if (props.school.school_status === 'relocated_gap') return 'bg-amber-100 text-amber-700'
-  return 'bg-gray-100 text-gray-500'
-})
-
-const statusBadgeLabel = computed(() => {
-  if (props.school.is_active) return 'Active'
-  if (props.school.school_status === 'merged') return 'Merged'
-  if (props.school.school_status === 'relocated_gap') return 'Relocated'
-  return 'Inactive'
-})
-
-const hasAttributes = computed(() => {
-  const s = props.school
-  const meaningful = (val) => val && val !== 'UNKNOWN'
-  return meaningful(s.zone_code)
-    || meaningful(s.dgp_code)
 })
 </script>

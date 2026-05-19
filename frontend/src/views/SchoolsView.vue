@@ -198,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import apiClient from '../services/api'
 import { metadata, metadataLoading, metadataError } from '../services/metadata'
 import SchoolCard from '../components/SchoolCard.vue'
@@ -254,6 +254,7 @@ function buildParams() {
 }
 
 async function fetchSchools() {
+  sessionStorage.setItem('schoolFilters', JSON.stringify(filters))
   loading.value = true
   error.value = null
   searched.value = true
@@ -304,6 +305,16 @@ async function fetchInactiveSchools() {
     inactiveLoading.value = false
   }
 }
+
+// Restore filters from sessionStorage on back navigation
+onMounted(() => {
+  const saved = sessionStorage.getItem('schoolFilters')
+  if (saved) {
+    const parsed = JSON.parse(saved)
+    Object.assign(filters, parsed)
+    fetchSchools()
+  }
+})
 
 // Watch for tab switch to inactive — fetch on first open
 watch(activeTab, (tab) => {
