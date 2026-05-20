@@ -36,8 +36,8 @@ def get_metadata() -> dict:
             type_code,
             nature_code
         FROM `{dataset}.dim_school`
-        WHERE zone_code IS NOT NULL
-          AND dgp_code IS NOT NULL
+        WHERE zone_code IS NOT NULL AND zone_code <> 'UNKNOWN'
+          AND dgp_code IS NOT NULL AND dgp_code <> 'UNKNOWN'
         ORDER BY
             zone_code ASC,
             dgp_code ASC
