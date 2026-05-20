@@ -6,7 +6,7 @@
         {{ school.school_name }}
       </h3>
       <span
-        class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full"
+        class="shrink-0 text-sm font-medium px-2 py-0.5 rounded-full"
         :class="statusBadgeClass"
       >
         {{ statusBadgeLabel }}
@@ -23,7 +23,7 @@
         {{ school.zone_code }}
       </span>
       <span v-if="school.dgp_code && school.dgp_code !== 'UNKNOWN'"
-        class="badge bg-gray-100 text-gray-600">
+        class="badge bg-blue-50 text-blue-700">
         {{ school.dgp_code }}
       </span>
       <span v-if="school.type_code" class="badge bg-gray-100 text-gray-600">
@@ -37,8 +37,8 @@
     <!-- Special programme indicators -->
     <div class="flex flex-wrap gap-2">
       <span v-if="school.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
+      <span v-if="school.gifted_ind" class="badge bg-teal-50 text-teal-700">GEP</span>
       <span v-if="school.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
-      <span v-if="school.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
       <!-- <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
     </div>
 

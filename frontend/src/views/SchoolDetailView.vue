@@ -25,8 +25,14 @@
         <h1 class="text-2xl font-bold text-gray-900 leading-snug">
           {{ school.school_name }}
         </h1>
-        <span
+        <!-- <span
           class="shrink-0 mt-1 text-xs font-medium px-2.5 py-1 rounded-full"
+          :class="statusBadgeClass"
+        >
+          {{ statusBadgeLabel }}
+        </span> -->
+        <span
+          class="shrink-0 mt-1 text-base font-semibold px-3 py-1.5 rounded-full"
           :class="statusBadgeClass"
         >
           {{ statusBadgeLabel }}
@@ -77,13 +83,17 @@
           </div>
 
           <!-- Programme badges -->
-          <div class="flex flex-wrap gap-2 mt-4">
-            <span v-if="school.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
-            <span v-if="school.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
-            <span v-if="school.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
-            <!-- <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
-            <!-- <span v-if="!school.sap_ind && !school.autonomous_ind && !school.gifted_ind && !school.ip_ind" -->
-            <span v-if="!school.sap_ind && !school.autonomous_ind && !school.gifted_ind"  class="text-xs text-gray-400">No special programmes</span>
+          <div class="mt-4">
+            <p class="detail-label mb-1.5">Special programmes</p>
+            <div class="flex flex-wrap gap-2">
+              <span v-if="school.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
+              <span v-if="school.gifted_ind" class="badge bg-teal-50 text-teal-700">GEP</span>
+              <span v-if="school.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
+              <!-- <span v-if="school.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
+              <!-- <span v-if="!school.sap_ind && !school.autonomous_ind && !school.gifted_ind && !school.ip_ind" -->
+              <span v-if="!school.sap_ind && !school.autonomous_ind && !school.gifted_ind"
+                class="text-sm text-gray-800">N/A</span>
+            </div>
           </div>
         </div>
 
@@ -105,7 +115,8 @@
         </div>
 
         <!-- Transport -->
-        <div class="section-card" v-if="school.mrt_desc || school.bus_desc">
+        <div class="section-card " v-if="school.mrt_desc || school.bus_desc">
+        <!-- <div class="section-card sm:col-start-2" v-if="school.mrt_desc || school.bus_desc"> -->
           <h2 class="section-title">Transport</h2>
           <div class="space-y-3">
             <div v-if="school.mrt_desc">
@@ -123,13 +134,15 @@
         <div class="section-card sm:col-span-2" v-if="hasLeadership">
           <h2 class="section-title">Leadership</h2>
           <div class="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
-            <DetailRow label="Principal" :value="school.principal_name" />
-            <DetailRow label="Vice-Principal" :value="school.first_vp_name" />
-            <DetailRow label="Vice-Principal" :value="school.second_vp_name" />
-            <DetailRow label="Vice-Principal" :value="school.third_vp_name" />
-            <DetailRow label="Vice-Principal" :value="school.fourth_vp_name" />
-            <DetailRow label="Vice-Principal" :value="school.fifth_vp_name" />
-            <DetailRow label="Vice-Principal" :value="school.sixth_vp_name" />
+            <div class="sm:col-span-2">
+              <DetailRow label="Principal" :value="school.principal_name" />
+            </div>
+            <DetailRow label="First Vice-Principal" :value="school.first_vp_name" />
+            <DetailRow label="Second Vice-Principal" :value="school.second_vp_name" />
+            <DetailRow label="Third Vice-Principal" :value="school.third_vp_name" />
+            <DetailRow label="Fourth Vice-Principal" :value="school.fourth_vp_name" />
+            <DetailRow label="Fifth Vice-Principal" :value="school.fifth_vp_name" />
+            <DetailRow label="Sixth Vice-Principal" :value="school.sixth_vp_name" />
           </div>
         </div>
 
@@ -141,18 +154,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import DetailRow from '../components/DetailRow.vue'
 import apiClient from '../services/api'
-
-// Inline DetailRow component — simple label + value pair
-const DetailRow = {
-  props: ['label', 'value'],
-  template: `
-    <div v-if="value">
-      <p class="detail-label">{{ label }}</p>
-      <p class="detail-value">{{ value }}</p>
-    </div>
-  `
-}
 
 const route = useRoute()
 const router = useRouter()

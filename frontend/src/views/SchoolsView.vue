@@ -92,6 +92,7 @@
         </div>
 
         <!-- Special programme toggles -->
+          <label class="block text-xs font-medium text-gray-600 mb-1">Additional Filters</label>
         <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-3">
           <label class="flex flex-col gap-0.5 cursor-pointer select-none">
             <div class="flex items-center gap-1.5">
@@ -102,17 +103,17 @@
           </label>
           <label class="flex flex-col gap-0.5 cursor-pointer select-none">
             <div class="flex items-center gap-1.5">
-              <input type="checkbox" v-model="filters.autonomous_ind" />
-              <span class="text-sm font-medium text-gray-700">Autonomous</span>
-            </div>
-            <span class="text-xs text-gray-400 leading-snug">Flexibility to introduce special programmes</span>
-          </label>
-          <label class="flex flex-col gap-0.5 cursor-pointer select-none">
-            <div class="flex items-center gap-1.5">
               <input type="checkbox" v-model="filters.gifted_ind" />
               <span class="text-sm font-medium text-gray-700">GEP [Gifted Education Programme]</span>
             </div>
             <span class="text-xs text-gray-400 leading-snug">For students identified as gifted in P3</span>
+          </label>
+          <label class="flex flex-col gap-0.5 cursor-pointer select-none">
+            <div class="flex items-center gap-1.5">
+              <input type="checkbox" v-model="filters.autonomous_ind" />
+              <span class="text-sm font-medium text-gray-700">Autonomous</span>
+            </div>
+            <span class="text-xs text-gray-400 leading-snug">Flexibility to introduce special programmes</span>
           </label>
           <!--label class="flex flex-col gap-0.5 cursor-pointer select-none">
             <div class="flex items-center gap-1.5">
