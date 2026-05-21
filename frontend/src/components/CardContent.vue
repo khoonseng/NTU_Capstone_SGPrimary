@@ -43,13 +43,13 @@
     </div>
 
     <!-- Active description -->
-    <p v-if="school.is_active" class="mt-3 text-xs text-gray-400 italic">
+    <p v-if="school.is_active" class="mt-3 text-xs text-gray-900 italic">
       Tap to view more school details
     </p>
 
     <!-- Inactive description -->
-    <p v-if="!school.is_active && school.school_status !== 'merged'"
-      class="mt-3 text-xs text-gray-400 italic">
+    <p v-if="!school.is_active && school.school_status != 'merged'"
+      class="mt-3 text-xs text-gray-900 italic">
       {{ school.school_status_description }}
        <br/><br/>
       Tap to view more school details

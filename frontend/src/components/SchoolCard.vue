@@ -18,8 +18,9 @@
       <CardContent :school="school" />
     </div>
     <!-- Disabled footer strip -->
-    <div class="px-5 py-2.5 bg-gray-50 border-t border-gray-200">
-      <p class="text-xs text-gray-400">
+    <!-- <div class="px-5 py-2.5 bg-gray-50 border-t border-gray-200"> -->
+    <div class="px-5 py-2.5">
+      <p class="text-xs text-gray-900 italic">
         {{ school.school_status_description }}
       </p>
     </div>
