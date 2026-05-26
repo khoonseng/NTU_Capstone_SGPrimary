@@ -200,6 +200,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import apiClient from '../services/api'
 import { metadata, metadataLoading, metadataError } from '../services/metadata'
 import SchoolCard from '../components/SchoolCard.vue'
@@ -307,13 +308,39 @@ async function fetchInactiveSchools() {
   }
 }
 
-// Restore filters from sessionStorage on back navigation
+// // Restore filters from sessionStorage on back navigation
+// onMounted(() => {
+//   const saved = sessionStorage.getItem('schoolFilters')
+//   if (saved) {
+//     const parsed = JSON.parse(saved)
+//     Object.assign(filters, parsed)
+//     fetchSchools()
+//   }
+// })
+
+// On mount: apply query params from HomeView deep links first,
+// then fall back to sessionStorage for back-navigation restoration
+const route = useRoute()
+
 onMounted(() => {
-  const saved = sessionStorage.getItem('schoolFilters')
-  if (saved) {
-    const parsed = JSON.parse(saved)
-    Object.assign(filters, parsed)
+  const q = route.query
+  const hasQueryParams = q.zone_code || q.dgp_code || q.type_code || q.nature_code
+
+  if (hasQueryParams) {
+    // Deep link from HomeView — pre-populate filters from URL
+    if (q.zone_code) filters.zone_code = q.zone_code
+    if (q.dgp_code) filters.dgp_code = q.dgp_code
+    if (q.type_code) filters.type_code = q.type_code
+    if (q.nature_code) filters.nature_code = q.nature_code
     fetchSchools()
+  } else {
+    // Back navigation — restore from sessionStorage
+    const saved = sessionStorage.getItem('schoolFilters')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      Object.assign(filters, parsed)
+      fetchSchools()
+    }
   }
 })
 

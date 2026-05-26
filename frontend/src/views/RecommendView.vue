@@ -624,7 +624,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import apiClient from '../services/api'
 import { metadata, metadataLoading, metadataError } from '../services/metadata'
 import RiskBadge from '../components/RiskBadge.vue'
@@ -751,4 +752,23 @@ function vacancyTrendClass(change) {
   if (change < 0) return 'text-red-600'
   return 'text-gray-800'
 }
+
+// On mount: apply query params from HomeView deep links
+const route = useRoute()
+
+onMounted(() => {
+  const q = route.query
+  const hasQueryParams = q.zone_code || q.dgp_code || q.phase
+
+  if (hasQueryParams) {
+    if (q.zone_code) filters.zone_code = q.zone_code
+    if (q.dgp_code) filters.dgp_code = q.dgp_code
+    if (q.phase) filters.phase = q.phase
+    
+    // has_balloting_3yr comes as string 'true'/'false' from URL — convert to boolean
+    if (q.has_balloting_3yr === 'true') filters.has_balloting_3yr = true
+    if (q.has_balloting_3yr === 'false') filters.has_balloting_3yr = false
+    fetchRecommendations()
+  }
+})
 </script>
