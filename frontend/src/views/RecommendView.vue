@@ -56,7 +56,7 @@
               <option value="3">3</option>
             </select>
           </div>
-          <div>
+          <!-- <div>
             <label class="block text-xs font-medium text-gray-600 mb-1">
               Balloting History
               <span v-if="!filters.phase" class="text-gray-300 ml-1">(select phase first)</span>
@@ -66,7 +66,20 @@
               :disabled="!filters.phase"
               class="filter-select disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <option :value="null">Any</option>
+              <option :value="null">All history</option>
+              <option :value="true">Balloted in last 3 years</option>
+              <option :value="false">Not balloted in last 3 years</option>
+            </select>
+          </div> -->
+          <div v-if="filters.phase">
+            <label class="block text-xs font-medium text-gray-600 mb-1">
+              Balloting History
+            </label>
+            <select
+              v-model="filters.has_balloting_3yr"
+              class="filter-select"
+            >
+              <option :value="null">All history</option>
               <option :value="true">Balloted in last 3 years</option>
               <option :value="false">Not balloted in last 3 years</option>
             </select>
@@ -542,6 +555,10 @@
                         Balloting Chance: {{ yr.ballot_chance_pct }}%
                       </p>
                     </div>
+                  </template>
+                  
+                  <template v-else>
+                    <p class="text-xs italic text-amber-700">Balloting details were not released pre-2024</p>
                   </template>
                 </div>
 

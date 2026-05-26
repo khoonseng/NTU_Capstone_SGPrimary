@@ -48,8 +48,14 @@ base AS (
             WHEN phase = '3' AND vacancy IS NULL THEN 0
             ELSE vacancy
         END AS vacancy,
-        applied,
-        taken,
+        CASE
+            WHEN phase != '3' AND vacancy = 0 AND applied IS NULL THEN 0
+            ELSE applied
+        END AS applied,
+        CASE
+            WHEN phase != '3' AND vacancy = 0 AND taken IS NULL THEN 0
+            ELSE taken
+        END AS taken,
 
         -- Ballot details
         ballot_scenario_code,
