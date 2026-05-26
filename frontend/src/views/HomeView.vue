@@ -30,13 +30,15 @@
       <!-- Use case 1 -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <div class="text-2xl mb-3">🏫</div>
-        <h3 class="text-sm font-semibold text-gray-900 mb-2">Explore Schools</h3>
-        
-        <router-link to="/schools"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          Browse Schools
-        </router-link>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 leading-snug">Explore Schools</h3>
+          <router-link to="/schools"
+            class="inline-flex shrink-0 items-center justify-center rounded-md bg-indigo-600
+                   px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                   hover:bg-indigo-700 transition-colors">
+            Explore
+          </router-link>
+        </div>
         <p class="text-xs text-gray-500 leading-relaxed mb-4">
           Browse all active primary schools by zone, estate, type, or special programmes
           (SAP, GEP, Autonomous). View school details including address, transport,
@@ -48,10 +50,11 @@
             "Show me all government-aided co-ed schools in Bishan."
           </p>
         </div>
-         <router-link
+        <router-link
           :to="{ path: '/schools', query: { dgp_code: 'BISHAN', type_code: 'GOVERNMENT-AIDED SCHOOL', nature_code: 'CO-ED SCHOOL' }}"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          class="inline-flex items-center justify-center rounded-md bg-amber-500
+                 px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                 hover:bg-amber-600 transition-colors">
           Try this example
         </router-link>
       </div>
@@ -59,12 +62,15 @@
       <!-- Use case 2 -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <div class="text-2xl mb-3">📍</div>
-        <h3 class="text-sm font-semibold text-gray-900 mb-2">Check Ballot Risk by Estate</h3>
-        <router-link to="/recommend"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          Get Recommendations
-        </router-link>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 leading-snug">Check Ballot Risk by Estate</h3>
+          <router-link to="/recommend"
+            class="inline-flex shrink-0 items-center justify-center rounded-md bg-indigo-600
+                   px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                   hover:bg-indigo-700 transition-colors">
+            Check
+          </router-link>
+        </div>
         <p class="text-xs text-gray-500 leading-relaxed mb-4">
           Planning to register at a school near your home or a home you are considering?
           Check ballot risk across schools in a specific estate from the most recent year to understand which
@@ -79,8 +85,9 @@
         </div>
         <router-link
           :to="{ path: '/recommend', query: { dgp_code: 'SENG KANG' }}"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          class="inline-flex items-center justify-center rounded-md bg-amber-500
+                 px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                 hover:bg-amber-600 transition-colors">
           Try this example
         </router-link>
       </div>
@@ -88,12 +95,15 @@
       <!-- Use case 3 -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         <div class="text-2xl mb-3">🎯</div>
-        <h3 class="text-sm font-semibold text-gray-900 mb-2">Find Low-Risk Schools</h3>
-        <router-link to="/recommend"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          Get Recommendations
-        </router-link>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 leading-snug">Find Low-Risk Schools</h3>
+          <router-link to="/recommend"
+            class="inline-flex shrink-0 items-center justify-center rounded-md bg-indigo-600
+                   px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                   hover:bg-indigo-700 transition-colors">
+            Find
+          </router-link>
+        </div>
         <p class="text-xs text-gray-500 leading-relaxed mb-4">
           Looking for schools in your zone with low ballot risk for a specific phase?
           Filter by phase to see trend data and balloting history across all schools
@@ -108,8 +118,9 @@
         </div>
         <router-link
           :to="{ path: '/recommend', query: { dgp_code: 'ANG MO KIO', phase: '2C', has_balloting_3yr: 'false' }}"
-          class="block text-center px-4 py-2 bg-blue-600 text-white text-sm
-                 font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          class="inline-flex items-center justify-center rounded-md bg-amber-500
+                 px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                 hover:bg-amber-600 transition-colors">
           Try this example
         </router-link>
       </div>
