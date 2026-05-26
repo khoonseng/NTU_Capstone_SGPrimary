@@ -4,7 +4,7 @@
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-900">Browse Schools</h1>
       <p class="text-gray-500 text-sm mt-1">
-        Filter active primary schools by zone, estate, type, and special programmes.
+        Filter active primary schools by zone, estate, type, nature, and special programmes.
       </p>
     </div>
 
