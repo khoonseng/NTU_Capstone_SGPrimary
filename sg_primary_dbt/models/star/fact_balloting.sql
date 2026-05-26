@@ -45,7 +45,7 @@ joined AS (
         b.is_over_enrolled,
         b.over_enrolled_count,
         b.ballot_scenario_code,
-        b.ballot_description,
+        b.ballot_description_mapped as ballot_description,
         b.ballot_applicants,
         b.ballot_vacancies,
         b.ballot_chance_pct,

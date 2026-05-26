@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .badge {
+    @apply text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+
+  .filter-select {
+    @apply w-full text-sm border border-gray-300 rounded-lg px-3 py-2
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+           bg-white text-gray-700;
+  }
+
+  .toggle-label {
+    @apply flex items-center text-sm text-gray-600 cursor-pointer
+           select-none font-medium;
+  }
+
+  .section-card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm p-5;
+  }
+
+  .section-title {
+    @apply text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4;
+  }
+
+  .detail-label {
+    @apply text-xs text-gray-400 mb-0.5;
+  }
+
+  .detail-value {
+    @apply text-sm text-gray-800;
+  }
+}

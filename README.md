@@ -49,6 +49,8 @@ It is also a portfolio project built during the **NTU SCTP Data Science and AI p
 
 ## Architecture Overview
 
+### Backend Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Data Sources                           │
@@ -112,6 +114,10 @@ It is also a portfolio project built during the **NTU SCTP Data Science and AI p
                     (us-central1, serverless)
                     Public API endpoint
 ```
+
+### Frontend Architecture
+For frontend architecture diagram, see [frontend architecture](./docs/frontend_architecture.md).
+
 
 ---
 

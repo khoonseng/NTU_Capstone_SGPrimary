@@ -44,9 +44,18 @@ base AS (
 
         -- Registration figures
         total_vacancy,
-        vacancy,
-        applied,
-        taken,
+        CASE
+            WHEN phase = '3' AND vacancy IS NULL THEN 0
+            ELSE vacancy
+        END AS vacancy,
+        CASE
+            WHEN phase != '3' AND vacancy = 0 AND applied IS NULL THEN 0
+            ELSE applied
+        END AS applied,
+        CASE
+            WHEN phase != '3' AND vacancy = 0 AND taken IS NULL THEN 0
+            ELSE taken
+        END AS taken,
 
         -- Ballot details
         ballot_scenario_code,
@@ -118,6 +127,16 @@ phase_mapped AS (
         ON n.phase_raw_normalised = p.phase_raw
 ),
 
+ballot_mapped AS (
+    SELECT
+        p.*,
+        c.description AS ballot_description_mapped
+    FROM phase_mapped p
+    LEFT JOIN {{ ref('balloting_codes') }} c
+        ON p.ballot_scenario_code = c.codes
+),
+
+
 -- ---------------------------------------------------------------------------
 -- STEP 4: Compute school-level totals using window function
 --
@@ -139,7 +158,7 @@ school_totals AS (
         SUM(taken) OVER (
             PARTITION BY school_name_clean, registration_year
         )                                           AS total_taken_all_phases
-    FROM phase_mapped
+    FROM ballot_mapped
 ),
 
 -- ---------------------------------------------------------------------------
@@ -225,6 +244,7 @@ final AS (
         -- ── Ballot details ───────────────────────────────────────────────────
         ballot_scenario_code,
         ballot_description,
+        ballot_description_mapped,
         ballot_applicants,
         ballot_vacancies,
         ballot_chance_pct,
