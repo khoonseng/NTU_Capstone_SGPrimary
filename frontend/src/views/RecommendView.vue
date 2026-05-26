@@ -180,8 +180,8 @@
       <h2 class="text-lg font-bold text-gray-800 mb-4">
         {{ results.length }} School{{ results.length !== 1 ? 's' : '' }} Found
         <span class="text-m font-normal text-gray-900 ml-2">
-          <span v-if="filters.phase">[Phase {{ filters.phase }} · Last 3 Years]</span>
-          <span v-else>[Most Recent Year Per Phase]</span>
+          <span v-if="filters.phase">[Phase {{ filters.phase }} · Recent 3 Years]</span>
+          <span v-else>[Based on {{ new Date().getFullYear() - 1 }} Registration Data]</span>
         </span>
       </h2>
     </div>
@@ -208,7 +208,7 @@
         </div>
 
         <!-- Phase rows -->
-        <div class="divide-y divide-gray-200">
+        <div class="divide-y divide-gray-400">
           <div v-for="phaseData in school.phases" :key="phaseData.phase" class="py-3 first:pt-0">
 
             <p class="text-xs font-bold text-gray-900 uppercase tracking-wide mb-2">
@@ -240,7 +240,7 @@
                   </div>
                 </div>
                 
-                <p class="text-xs text-gray-400 italic">
+                <p class="text-xs text-gray-700 italic text-center">
                   Only international students may apply. Places offered only if vacancies remain after all earlier phases.
                 </p>
               </template>
@@ -479,9 +479,9 @@
                       <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">
                         {{ yr.vacancy ?? '—' }}
                       </p>
-                    </div>
+                    </div>                    
                   </div>
-                  <p class="text-xs text-gray-400 italic">
+                  <p class="text-xs text-gray-700 italic">
                     Only international students may apply. Places offered only if vacancies remain after all earlier phases.
                   </p>
                 </template>
