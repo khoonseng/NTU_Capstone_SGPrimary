@@ -204,8 +204,9 @@
 
             <!-- Phase 3 — international students only -->
             <template v-if="phaseData.phase === '3'">
-              <template v-if="isPhaseOpened(phaseData.years[0])">
-                <div class="grid grid-cols-3 gap-2 text-center mb-2">
+              <template v-if="isPhaseOpened(phaseData.years[0])">                
+                <!-- Desktop -->
+                <div class="hidden sm:grid sm:grid-cols-5 sm:gap-2 sm:text-center mb-2">
                   <div>
                     <p class="text-xs text-gray-400 mb-0.5">Vacancy</p>
                     <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">
@@ -213,6 +214,19 @@
                     </p>
                   </div>
                 </div>
+
+              <!-- Mobile 3×2 -->
+                <div class="sm:hidden mb-2">
+                  <div class="grid grid-cols-3 gap-2 mb-2">
+                    <div class="text-center">
+                      <p class="text-xs text-gray-400 mb-0.5 leading-tight">Vacancy</p>
+                      <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                        {{ phaseData.years[0]?.vacancy || 'N/A' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <p class="text-xs text-gray-400 italic">
                   Only international students may apply. Places offered only if vacancies remain after all earlier phases.
                 </p>
@@ -431,7 +445,7 @@
                   </div>
                 </div>
                 <p class="text-xs text-gray-400 italic">
-                  Only international students may apply.
+                  Only international students may apply. Places offered only if vacancies remain after all earlier phases.
                 </p>
               </template>
 
