@@ -150,6 +150,12 @@
         <p class="text-sm font-semibold text-blue-800 mb-3">Ballot Risk Levels</p>
         <div class="grid grid-cols-1 gap-2">
           <div class="flex items-start gap-3">
+            <span class="badge bg-gray-300 text-gray-900 shrink-0 w-16 text-center">N/A</span>
+            <p class="text-xs text-blue-700 leading-snug">
+              Balloting is not applicable. Phase was not opened — all places were filled in earlier phases.
+            </p>
+          </div>
+          <div class="flex items-start gap-3">
             <span class="badge bg-red-100 text-red-700 shrink-0 w-16 text-center">HIGH</span>
             <p class="text-xs text-blue-700 leading-snug">
               Balloted in all 3 of the last 3 years with average subscription rate above 1.2×. Competition is intense.
@@ -165,12 +171,6 @@
             <span class="badge bg-green-100 text-green-700 shrink-0 w-16 text-center">LOW</span>
             <p class="text-xs text-blue-700 leading-snug">
               No balloting in the last 3 years. Vacancies available without balloting based on recent trends.
-            </p>
-          </div>
-          <div class="flex items-start gap-3">
-            <span class="badge bg-gray-100 text-gray-500 shrink-0 w-16 text-center">N/A</span>
-            <p class="text-xs text-blue-700 leading-snug">
-              Balloting is not applicable. Phase was not opened — all places were filled in earlier phases.
             </p>
           </div>
         </div>
@@ -211,7 +211,7 @@
         <div class="divide-y divide-gray-200">
           <div v-for="phaseData in school.phases" :key="phaseData.phase" class="py-3 first:pt-0">
 
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+            <p class="text-xs font-bold text-gray-900 uppercase tracking-wide mb-2">
               Phase {{ phaseData.phase }}
             </p>
 
@@ -228,7 +228,7 @@
                   </div>
                 </div>
 
-              <!-- Mobile 3×2 -->
+                <!-- Mobile 3×2 -->
                 <div class="sm:hidden mb-2">
                   <div class="grid grid-cols-3 gap-2 mb-2">
                     <div class="text-center">
@@ -244,8 +244,9 @@
                   Only international students may apply. Places offered only if vacancies remain after all earlier phases.
                 </p>
               </template>
+
               <template v-else>
-                <p class="text-xs text-gray-700">Phase not opened</p>
+                <p class="text-xs text-gray-700">Phase {{ phaseData.phase }} was not opened</p>
               </template>
             </template>
 
@@ -355,7 +356,7 @@
               <!-- Phase not opened -->
               <template v-else>
                 <div class="flex items-center justify-between">
-                  <p class="text-xs text-gray-700">Phase not opened</p>
+                  <p class="text-xs text-gray-700">Phase {{ phaseData.phase }} was not opened</p>
                   <!-- <span class="badge bg-gray-100 text-gray-400">N/A</span> -->
                 </div>
               </template>
@@ -391,46 +392,68 @@
           </div>
         </div>
 
-        <!-- Stat boxes -->
-        <div class="mb-4">
-          <!-- Risk box — full width -->
-          <div class="rounded-lg p-3 mb-3 text-center"
-            :class="riskBoxClass(school.latest_year?.ballot_risk_level)">
-            <p class="text-xs font-medium mb-1"
-              :class="riskLabelClass(school.latest_year?.ballot_risk_level)">
-              Ballot Risk Level
-            </p>
-            <p class="text-lg font-bold"
-              :class="riskLabelClass(school.latest_year?.ballot_risk_level)">
-              {{ school.latest_year?.ballot_risk_level ?? '—' }}
-            </p>
-          </div>
+        <template v-if="isPhaseOpened(school.latest_year)">    
+          <!-- Stat boxes -->
+          <div class="mb-4">
+            <!-- Risk box — full width -->
+            <div class="rounded-lg p-3 mb-3 text-center"
+              :class="riskBoxClass(school.latest_year?.ballot_risk_level)">
+              <p class="text-xs font-medium mb-1"
+                :class="riskLabelClass(school.latest_year?.ballot_risk_level)">
+                Ballot Risk Level
+              </p>
+              <p class="text-lg font-bold"
+                :class="riskLabelClass(school.latest_year?.ballot_risk_level)">
+                {{ school.latest_year?.ballot_risk_level ?? '—' }}
+              </p>
+            </div>
 
-          <!-- 3 stat boxes in 2-column grid (3rd wraps to new row) -->
-          <div class="grid grid-cols-3 gap-2">
-            <div class="bg-gray-50 rounded-lg p-3 text-center">
-              <p class="text-xs text-gray-400 mb-1">Average Subscription Rate</p>
-              <p class="text-sm font-semibold text-gray-800">
-                {{ school.trend?.subscription_rate_3yr_avg
-                  ? school.trend.subscription_rate_3yr_avg.toFixed(2) + 'x' : 'N/A' }}
-              </p>
+            <!-- 3 stat boxes in 2-column grid (3rd wraps to new row) -->
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-gray-400 mb-1">Average Subscription Rate</p>
+                <p class="text-sm font-semibold text-gray-800">
+                  {{ school.trend?.subscription_rate_3yr_avg
+                    ? school.trend.subscription_rate_3yr_avg.toFixed(2) + 'x' : 'N/A' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-gray-400 mb-1">Balloted (Last 3 Years)</p>
+                <p class="text-sm font-semibold text-gray-800">
+                  {{ school.trend?.ballot_occurrences_last_3yr != null
+                    ? school.trend.ballot_occurrences_last_3yr + ' / 3' : '—' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-gray-400 mb-1">Vacancy Trend (Year On Year)</p>
+                <p class="text-sm font-semibold"
+                  :class="vacancyTrendClass(school.trend?.vacancy_yoy_change)">
+                  {{ formatVacancyTrend(school.trend?.vacancy_yoy_change) }}
+                </p>
+              </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-3 text-center">
-              <p class="text-xs text-gray-400 mb-1">Balloted (Last 3 Years)</p>
-              <p class="text-sm font-semibold text-gray-800">
-                {{ school.trend?.ballot_occurrences_last_3yr != null
-                  ? school.trend.ballot_occurrences_last_3yr + ' / 3' : '—' }}
+          </div>
+        </template>
+
+
+        <template v-else>
+              <!-- Stat boxes -->
+          <div class="mb-4">
+            <!-- Risk box — full width -->
+            <div class="rounded-lg p-3 mb-3 text-center"
+              :class="riskBoxClass('N/A')">
+              <p class="text-xs font-medium mb-1"
+                :class="riskLabelClass('N/A')">
+                Ballot Risk Level
               </p>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-3 text-center">
-              <p class="text-xs text-gray-400 mb-1">Vacancy Trend (Year On Year)</p>
-              <p class="text-sm font-semibold"
-                :class="vacancyTrendClass(school.trend?.vacancy_yoy_change)">
-                {{ formatVacancyTrend(school.trend?.vacancy_yoy_change) }}
+              <p class="text-lg font-bold"
+                :class="riskLabelClass('N/A')">
+                {{ 'N/A' }}
               </p>
             </div>
           </div>
-        </div>
+        </template>
+
 
         <!-- History rows -->
         <div class="divide-y divide-gray-200">
@@ -438,7 +461,7 @@
             class="py-3 first:pt-0"
             :class="yr.is_current_year ? 'opacity-30' : ''">
 
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+            <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
               {{ yr.registration_year }}
               <span v-if="yr.is_current_year" class="normal-case font-normal">
                 (current year — pending data)
@@ -446,26 +469,38 @@
             </p>
 
             <template v-if="!yr.is_current_year">
-
+              <!-- <template v-if="yr.vacancy !== 0"> -->
               <!-- Phase 3 history — vacancy only -->
               <template v-if="filters.phase === '3'">
-                <div class="grid grid-cols-3 gap-2 text-center mb-2">
-                  <div>
-                    <p class="text-xs text-gray-400 mb-0.5 leading-tight">Vacancy</p>
-                    <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">
-                      {{ yr.vacancy ?? '—' }}
-                    </p>
+                <template v-if="yr.vacancy > 0">
+                  <div class="grid grid-cols-3 gap-2 text-center mb-2">
+                    <div>
+                      <p class="text-xs text-gray-400 mb-0.5 leading-tight">Vacancy</p>
+                      <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">
+                        {{ yr.vacancy ?? '—' }}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <p class="text-xs text-gray-400 italic">
-                  Only international students may apply. Places offered only if vacancies remain after all earlier phases.
-                </p>
+                  <p class="text-xs text-gray-400 italic">
+                    Only international students may apply. Places offered only if vacancies remain after all earlier phases.
+                  </p>
+                </template>
+                
+                <!-- Phase not opened -->
+                <template v-else>
+                  <div class="flex items-center justify-between">
+                    <p class="text-xs text-gray-700">Phase {{ school.phase }} was not opened</p>
+                    <!-- <span class="badge bg-gray-100 text-gray-400">N/A</span> -->
+                  </div>
+                </template>
               </template>
+              <!-- </template> -->
 
               <!-- Phases 2B, 2C, 2C(S) history -->
               <template v-else>
                 <!-- Desktop -->
-                <div class="hidden sm:grid sm:grid-cols-6 sm:gap-2 sm:text-center mb-2">
+                <template v-if="yr.vacancy > 0">
+                  <div class="hidden sm:grid sm:grid-cols-6 sm:gap-2 sm:text-center mb-2">
                   <div>
                     <p class="text-xs text-gray-400 mb-0.5">Vacancy</p>
                     <p class="text-sm font-semibold text-gray-800 whitespace-nowrap">{{ yr.vacancy ?? '—' }}</p>
@@ -561,6 +596,15 @@
                     <p class="text-xs italic text-amber-700">Balloting details were not released pre-2024</p>
                   </template>
                 </div>
+                </template>
+                
+                <!-- Phase not opened -->
+                <template v-else>
+                  <div class="flex items-center justify-between">
+                    <p class="text-xs text-gray-700">Phase {{ school.phase }} was not opened</p>
+                    <!-- <span class="badge bg-gray-100 text-gray-400">N/A</span> -->
+                  </div>
+                </template>
 
               </template>
             </template>

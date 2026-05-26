@@ -19,7 +19,7 @@
             class="text-sm font-medium text-gray-600 hover:text-blue-700 transition-colors"
             active-class="text-blue-700"
           >
-            Recommend
+            Recommendations
           </router-link>
         </div>
       </div>

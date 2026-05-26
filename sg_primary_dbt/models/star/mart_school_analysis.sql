@@ -41,11 +41,13 @@ WITH
 -- because they are priority phases with guaranteed or semi-guaranteed entry
 -- and are not the basis for ballot difficulty predictions.
 -- Phases 2A(1), 2A(2), 2 will be considered in future
+-- NOTE: ballot scenario code is only available from 2019 onwards
 -- ---------------------------------------------------------------------------
 balloting_filtered AS (
     SELECT *
     FROM {{ ref('fact_balloting') }}
     WHERE phase_normalised IN ('2B', '2C', '2C(S)', '3')
+    and registration_year >= 2019
 ),
 
 -- ---------------------------------------------------------------------------
@@ -194,6 +196,7 @@ with_ballot_encoding AS (
 --                               3 = balloted every year for 3 years (high risk)
 -- vacancy_yoy_change:           negative = school shrinking intake (higher pressure)
 --                               positive = school growing intake (lower pressure)
+-- NOTE: ballot scenario code is only available from 2019 onwards
 -- ---------------------------------------------------------------------------
 with_trends AS (
     SELECT
@@ -225,7 +228,13 @@ with_trends AS (
         -- Count of years where balloting occurred in last 3 years
         -- Encodes ballot streak: 3/3 = consistently oversubscribed = high risk
         SUM(
-            CASE WHEN ballot_scenario_code IS NOT NULL THEN 1 ELSE 0 END
+            CASE 
+                WHEN ballot_scenario_code IS NOT NULL
+                AND RIGHT(ballot_scenario_code, 1) != '#' 
+                THEN 1
+                
+                ELSE 0
+            END
         ) OVER (
             PARTITION BY school_key, phase_normalised
             ORDER BY registration_year
@@ -234,7 +243,13 @@ with_trends AS (
 
         -- 5-year ballot occurrence count
         SUM(
-            CASE WHEN ballot_scenario_code IS NOT NULL THEN 1 ELSE 0 END
+            CASE 
+                WHEN ballot_scenario_code IS NOT NULL
+                AND RIGHT(ballot_scenario_code, 1) != '#' 
+                THEN 1
+                
+                ELSE 0
+            END
         ) OVER (
             PARTITION BY school_key, phase_normalised
             ORDER BY registration_year
@@ -274,7 +289,7 @@ with_ballot_risk AS (
             WHEN ballot_occurrences_last_3yr >= 1   
             AND subscription_rate_3yr_avg > 1.2                               
             THEN 'MEDIUM'
-            
+                        
             ELSE 'LOW'
         END                                         AS ballot_risk_level
         
