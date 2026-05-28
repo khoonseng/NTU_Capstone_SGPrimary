@@ -60,16 +60,16 @@ SGPrimary is now deployed as a full-stack application. Firebase Hosting serves t
 ```mermaid
 flowchart TD
     PARENT["Parent browser\nDesktop or mobile"]
-    FIREBASE["Firebase Hosting\nhttps://test-sg-moe.web.app"]
+    FIREBASE["Firebase Hosting\nWeb application"]
     VUE["Vue 3 app\nVite build output"]
-    API["Cloud Run\nFastAPI API"]
-    BQ["BigQuery\nsg_moe_star marts"]
+    API["Cloud Run\nFastAPI"]
+    BQ["BigQuery\nStar schema & marts"]
 
     RAW1["data.gov.sg\nSchool metadata"]
     RAW2["sgschooling.com\nP1 balloting history"]
     GCS["Google Cloud Storage\nRaw archive"]
     RAWBQ["BigQuery raw schema"]
-    DBT["dbt\nstaging + star models"]
+    DBT["dbt\nStaging & star models"]
 
     RAW1 --> GCS
     RAW2 --> GCS
@@ -83,6 +83,8 @@ flowchart TD
     API -->|SQL queries| BQ
     API -->|JSON responses| VUE
 ```
+
+![Technical Architecture Diagram](./docs/technical%20architecture%20diagram.png)
 
 Detailed frontend deployment and runtime diagrams are available in:
 
