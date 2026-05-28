@@ -392,7 +392,8 @@
           </div>
         </div>
 
-        <template v-if="isPhaseOpened(school.latest_year)">    
+        <template v-if="isPhaseOpened(school.latest_year)">
+          <h3 class="font-semibold text-gray-900">Phase {{ school.phase }}</h3>
           <!-- Stat boxes -->
           <div class="mb-4">
             <!-- Risk box — full width -->
@@ -437,6 +438,7 @@
 
 
         <template v-else>
+          <h3 class="font-semibold text-gray-900">Phase {{ school.phase }}</h3>
               <!-- Stat boxes -->
           <div class="mb-4">
             <!-- Risk box — full width -->
