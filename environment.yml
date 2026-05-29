@@ -11,6 +11,7 @@ dependencies:
   - beautifulsoup4=4.14.2   # added for web scraping 
   #- google-cloud-storage=3.4.1  # referenced from bde [Store data in Google Cloud Storage (GCS) as data lake]
   - google-cloud-storage=3.1.0  # Downgraded from 3.4.1 to 3.1.0 to satisfy dbt-bigquery (<3.2) compatibility
+  - google-genai>=1.65.0  # Google Gen AI SDK for Vertex AI embeddings
   - requests=2.32.5  # referenced from elt [External data sources via REST APIs]
   - pyarrow=21.0.0  # referenced from bde [Process Parquet files]
   # Data Warehouse & Transformation
@@ -39,7 +40,6 @@ dependencies:
       - langchain>=0.3.0
       - langchain-core>=0.3.0
       - langchain-community>=0.3.0
-      - langchain-google-vertexai>=2.0.0
       - langchain-google-community[bigquery]>=2.0.0
       - langchain-groq>=0.2.0
       - google-cloud-aiplatform>=1.60.0
