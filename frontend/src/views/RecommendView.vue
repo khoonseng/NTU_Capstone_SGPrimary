@@ -195,16 +195,38 @@
         <div class="flex items-start justify-between gap-3 mb-4">
           <div>
             <h3 class="font-semibold text-gray-900">{{ school.school_name }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">
-              {{ [school.zone_code, school.dgp_code].filter(Boolean).join(' · ') }}
+            <!-- <p class="text-xs text-gray-400 mt-0.5">
+              {{ [school.zone_code, school.dgp_code].filter(Boolean).join(' · ') }}              
+            </p> -->
+            <span v-if="school.zone_code && school.zone_code !== 'UNKNOWN'"
+              class="badge bg-blue-50 text-blue-700">
+              {{ school.zone_code }}
+            </span>
+            <span v-if="school.dgp_code && school.dgp_code !== 'UNKNOWN'"
+              class="badge bg-blue-50 text-blue-700">
+              {{ school.dgp_code }}
+            </span>
+            <p>
+              <span v-if="school.school_attributes.type_code" class="badge bg-gray-100 text-gray-600">
+                {{ school.school_attributes.type_code }}
+              </span>
+            </p>
+            <p>
+              <span v-if="school.school_attributes.nature_code" class="badge bg-gray-100 text-gray-600">
+                {{ school.school_attributes.nature_code }}
+              </span>
+            </p>
+            <p v-if="school.school_attributes?.sap_ind || school.school_attributes?.gifted_ind || school.school_attributes?.autonomous_ind">
+              <span v-if="school.school_attributes?.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
+              <span v-if="school.school_attributes?.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
+              <span v-if="school.school_attributes?.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
             </p>
           </div>
-          <div class="flex gap-2 shrink-0 flex-wrap justify-end">
+          <!-- <div class="flex gap-2 shrink-0 flex-wrap justify-end">
             <span v-if="school.school_attributes?.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
             <span v-if="school.school_attributes?.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
             <span v-if="school.school_attributes?.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
-            <!-- <span v-if="school.school_attributes?.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
-          </div>
+          </div> -->
         </div>
 
         <!-- Phase rows -->
@@ -380,16 +402,38 @@
         <div class="flex items-start justify-between gap-3 mb-4">
           <div>
             <h3 class="font-semibold text-gray-900">{{ school.school_name }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">
+            <!-- <p class="text-xs text-gray-400 mt-0.5">
               {{ [school.zone_code, school.dgp_code].filter(Boolean).join(' · ') }}
+            </p> -->
+            <span v-if="school.zone_code && school.zone_code !== 'UNKNOWN'"
+              class="badge bg-blue-50 text-blue-700">
+              {{ school.zone_code }}
+            </span>
+            <span v-if="school.dgp_code && school.dgp_code !== 'UNKNOWN'"
+              class="badge bg-blue-50 text-blue-700">
+              {{ school.dgp_code }}
+            </span>
+            <p>
+              <span v-if="school.school_attributes.type_code" class="badge bg-gray-100 text-gray-600">
+                {{ school.school_attributes.type_code }}
+              </span>
+            </p>
+            <p>
+              <span v-if="school.school_attributes.nature_code" class="badge bg-gray-100 text-gray-600">
+                {{ school.school_attributes.nature_code }}
+              </span>
+            </p>
+            <p v-if="school.school_attributes?.sap_ind || school.school_attributes?.gifted_ind || school.school_attributes?.autonomous_ind">
+              <span v-if="school.school_attributes?.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
+              <span v-if="school.school_attributes?.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
+              <span v-if="school.school_attributes?.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
             </p>
           </div>
-          <div class="flex gap-2 shrink-0 flex-wrap justify-end">
+          <!-- <div class="flex gap-2 shrink-0 flex-wrap justify-end">
             <span v-if="school.school_attributes?.sap_ind" class="badge bg-amber-50 text-amber-700">SAP</span>
             <span v-if="school.school_attributes?.gifted_ind" class="badge bg-indigo-50 text-indigo-700">GEP</span>
             <span v-if="school.school_attributes?.autonomous_ind" class="badge bg-purple-50 text-purple-700">Autonomous</span>
-            <!-- <span v-if="school.school_attributes?.ip_ind" class="badge bg-teal-50 text-teal-700">IP</span> -->
-          </div>
+          </div> -->
         </div>
 
         <template v-if="isPhaseOpened(school.latest_year)">
