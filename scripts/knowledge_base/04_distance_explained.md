@@ -1,17 +1,17 @@
-source_url: https://www.moe.gov.sg/primary/p1-registration/understand-balloting
-source_title: Understand how balloting works
+source_url: https://www.moe.gov.sg/primary/p1-registration/distance
+source_title: How distance affects priority admission
 source_last_updated: 2026-04-29
 curated_on: 2026-05-29
 policy_year: 2026
 canonical_source: MOE
-topic: Primary 1 (P1) registration - Understand how balloting works
+topic: Primary 1 (P1) registration - How distance affects priority admission
 
-# Primary 1 (P1) registration - Understand how balloting works
-Source: Primary 1 (P1) registration - Understand how balloting works from Primary 1 (P1) registration - Understand how balloting works
+# Primary 1 (P1) registration - How distance affects priority admission
+Source: Primary 1 (P1) registration - How distance affects priority admission from https://www.moe.gov.sg/primary/p1-registration/distance
 Last checked: 2026-05-29
 Applies to: 2026 P1 Registration Exercise
 
-Balloting can happen at Phases 2A to 2C Supplementary of the Primary 1 (P1) Registration Exercise. Balloting is conducted when the number of applicants exceeds the school vacancies, which can happen in any phase from 2A to 2C Supplementary. Computerised balloting will be conducted centrally by MOE. All applicants who are required to ballot are assured of an equal chance for admission into the school.
+Priority is given to Singapore Citizens and Permanent Residents who live closer to the preferred school when there are more applicants than vacancies. If your chosen primary school has more applicants than vacancies, priority admission will be given based on your child's citizenship and the Home-School Distance (HSD) category, which is in turn based on the address used for registration.
 
 
 ## Key rules
