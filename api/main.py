@@ -19,7 +19,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import schools, recommend, predict, metadata, school_detail
+from api.routers import schools, recommend, predict, metadata, school_detail, advisor
 
 
 app = FastAPI(
@@ -37,7 +37,7 @@ app.add_middleware(
         "https://test-sg-moe.web.app",     # Firebase Hosting (primary)
         "https://test-sg-moe.firebaseapp.com",  # Firebase Hosting (secondary)
     ],
-    allow_methods=["GET"],                 # API is read-only
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -84,6 +84,7 @@ app.include_router(recommend.router)
 app.include_router(predict.router)
 app.include_router(metadata.router)
 app.include_router(school_detail.router)
+app.include_router(advisor.router)
 
 
 # ---------------------------------------------------------------------------

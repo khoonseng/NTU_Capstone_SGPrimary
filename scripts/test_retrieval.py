@@ -10,8 +10,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from google.cloud import bigquery
 
-sys.path.insert(0, str(Path(__file__).parent))
-from test_vertex_embeddings import VertexGenAIEmbeddings
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from api.services.embeddings import VertexGenAIEmbeddings
 
 load_dotenv()
 

@@ -13,8 +13,8 @@ from google.cloud import bigquery
 from langchain_text_splitters import MarkdownTextSplitter
 
 # Import the custom embeddings wrapper built on Day 1
-sys.path.insert(0, str(Path(__file__).parent))
-from test_vertex_embeddings import VertexGenAIEmbeddings
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from api.services.embeddings import VertexGenAIEmbeddings
 
 load_dotenv()
 

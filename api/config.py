@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     """
     gcp_project_id: str
     bq_dataset: str = "sg_moe_star"         # default to the star schema
+    groq_api_key: str | None = None
 
     # Optional: local dev uses GOOGLE_APPLICATION_CREDENTIALS file path.
     # Cloud Run uses ADC (Application Default Credentials) automatically —
@@ -59,3 +60,6 @@ def get_bq_client() -> bigquery.Client:
     """
     settings = get_settings()
     return bigquery.Client(project=settings.gcp_project_id)
+
+# Module-level settings instance for direct import
+settings = get_settings()

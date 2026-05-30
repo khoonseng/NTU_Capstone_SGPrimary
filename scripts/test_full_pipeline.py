@@ -2,8 +2,8 @@ import os
 import uuid
 from dotenv import load_dotenv
 from google.cloud import bigquery
-# from langchain_google_vertexai import VertexAIEmbeddings
-from test_vertex_embeddings import VertexGenAIEmbeddings
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from api.services.embeddings import VertexGenAIEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
