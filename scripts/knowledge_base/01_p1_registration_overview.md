@@ -1,3 +1,4 @@
+---
 source_url: https://www.moe.gov.sg/primary/p1-registration
 source_title: Primary 1 (P1) registration
 source_last_updated: 2026-04-29
@@ -5,7 +6,7 @@ curated_on: 2026-05-29
 policy_year: 2026
 canonical_source: MOE
 topic: Primary 1 (P1) registration
-
+---
 
 # Primary 1 (P1) registration
 Source: Primary 1 (P1) registration from https://www.moe.gov.sg/primary/p1-registration

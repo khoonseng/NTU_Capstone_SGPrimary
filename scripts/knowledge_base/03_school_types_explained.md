@@ -1,3 +1,4 @@
+---
 source_url: https://www.moe.gov.sg/education-in-sg/our-schools/types-of-schools
 source_title: Types of schools
 source_last_updated: 2026-01-12
@@ -5,6 +6,7 @@ curated_on: 2026-05-29
 policy_year: 2026
 canonical_source: MOE
 topic: Types of schools
+---
 
 # Types of schools
 Source: Types of schools from https://www.moe.gov.sg/education-in-sg/our-schools/types-of-schools

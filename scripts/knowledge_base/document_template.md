@@ -1,3 +1,4 @@
+---
 source_url:
 source_title:
 source_last_updated:
@@ -5,6 +6,7 @@ curated_on:
 policy_year:
 canonical_source: MOE
 topic:
+---
 
 # Topic Title
 

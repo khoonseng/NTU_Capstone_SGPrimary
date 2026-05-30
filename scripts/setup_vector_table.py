@@ -15,6 +15,9 @@ schema = [
     bigquery.SchemaField("domain", "STRING", mode="REQUIRED"),
     bigquery.SchemaField("topic", "STRING", mode="REQUIRED"),
     bigquery.SchemaField("source_file", "STRING"),
+    bigquery.SchemaField("source_url", "STRING"),          # add this
+    bigquery.SchemaField("policy_year", "INTEGER"),        # add this
+    bigquery.SchemaField("canonical_source", "STRING"),    # add this
     bigquery.SchemaField("content", "STRING", mode="REQUIRED"),
     bigquery.SchemaField("embedding", "FLOAT64", mode="REPEATED"),
 ]
