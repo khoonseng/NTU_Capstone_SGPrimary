@@ -12,7 +12,7 @@ from api.config import settings
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 PROJECT_ID = settings.gcp_project_id
-DATASET_ID = f"{os.getenv('BQ_DATASET', 'sg_moe')}_star"
+DATASET_ID = f"{settings.bq_dataset}_star"
 VECTOR_TABLE = "advisor_knowledge_base"
 LOCATION = "us-central1"
 GROQ_MODEL="llama-3.3-70b-versatile"
