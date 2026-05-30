@@ -27,8 +27,8 @@ async def ask_advisor(request: AdvisorRequest):
         )
     except Exception as e:
         # Temporary: print real error for debugging
-        import traceback
-        traceback.print_exc()
+        # import traceback
+        # traceback.print_exc()
         
         # Surface as 503 rather than 500 — likely a Groq or Vertex AI
         # transient failure, not a code bug
