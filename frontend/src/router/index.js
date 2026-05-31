@@ -3,12 +3,14 @@ import HomeView from '../views/HomeView.vue'
 import SchoolsView from '../views/SchoolsView.vue'
 import RecommendView from '../views/RecommendView.vue'
 import SchoolDetailView from '../views/SchoolDetailView.vue'
+import AdvisorView from '../views/AdvisorView.vue'
 
 const routes = [
   { path: '/', component: HomeView },
   { path: '/schools', component: SchoolsView },
   { path: '/schools/:schoolName', component: SchoolDetailView },
   { path: '/recommend', component: RecommendView },
+  { path: '/advisor', component: AdvisorView },
 ]
 
 const router = createRouter({

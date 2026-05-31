@@ -21,6 +21,13 @@
           >
             Recommendations
           </router-link>
+          <router-link
+            to="/advisor"
+            class="text-sm font-medium text-gray-600 hover:text-blue-700 transition-colors"
+            active-class="text-blue-700"
+          >
+            Advisor
+          </router-link>
         </div>
       </div>
     </nav>

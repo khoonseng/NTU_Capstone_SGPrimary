@@ -11,6 +11,7 @@ class AdvisorRequest(BaseModel):
     question: str = Field(min_length=3, max_length=500)
     school_name: str | None = None
     phase: str | None = None
+    session_id: str | None = None
     conversation_history: list[dict] | None = None  # unused in Week 4, wired for Week 5
 
 
