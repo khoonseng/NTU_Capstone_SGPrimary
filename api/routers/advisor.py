@@ -22,7 +22,7 @@ async def ask_advisor(request: AdvisorRequest):
     try:
         result = run_advisor(
             question=request.question,
-            school_name=request.school_name,
+            school_names=request.school_names,
             conversation_history=request.conversation_history,
         )
     except Exception as e:

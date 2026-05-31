@@ -97,52 +97,132 @@ def format_docs(docs: list[Document]) -> str:
 
 # ── SQL School Context ─────────────────────────────────────────────────────────
 
-def fetch_school_context(school_name: str) -> str:
+def fetch_school_context(school_names: list[str]) -> str:
     """
-    Query mart_school_analysis for recent balloting history for a given school.
-    Returns formatted string for injection into the LLM prompt.
-    Returns empty string if no data found.
-    """
-    client = bq.Client(project=PROJECT_ID)
-    query = f"""
-        SELECT
-            registration_year,
-            phase_normalised,
-            vacancy,
-            applied,
-            taken,
-            subscription_rate,
-            ballot_risk_level,
-            ballot_occurrences_last_3yr,
-            subscription_rate_3yr_avg
-        FROM `{PROJECT_ID}.{DATASET_ID}.mart_school_analysis`
-        WHERE UPPER(TRIM(school_name_clean)) = UPPER(TRIM(@school_name))
-          AND registration_year >= 2022
-        ORDER BY registration_year DESC, phase_normalised
-        LIMIT 20
-    """
-    job_config = bq.QueryJobConfig(
-        query_parameters=[
-            bq.ScalarQueryParameter("school_name", "STRING", school_name)
-        ]
-    )
-    rows = list(client.query(query, job_config=job_config).result())
+    For each school name, fetch:
+    1. Balloting history from mart_school_analysis (structured trend data)
+    2. General info from dim_school + dim_school_generalinfo (attributes, contact)
 
-    if not rows:
+    Returns formatted string for injection into the LLM prompt.
+    Returns empty string if no data found for any school.
+    """
+    if not school_names:
         return ""
 
-    lines = [f"School: {school_name}"]
-    for r in rows:
-        lines.append(
-            f"  {r['registration_year']} {r['phase_normalised']}: "
-            f"vacancy={r['vacancy']}, applied={r['applied']}, "
-            f"taken={r['taken']}, "
-            f"subscription_rate={r['subscription_rate']}, "
-            f"ballot_risk={r['ballot_risk_level']}, "
-            f"ballot_occurrences_last_3yr={r['ballot_occurrences_last_3yr']}, "
-            f"subscription_rate_3yr_avg={r['subscription_rate_3yr_avg']}"
+    client = bq.Client(project=PROJECT_ID)
+    sections = []
+
+    for school_name in school_names:
+        school_upper = school_name.upper().strip()
+        school_sections = []
+
+        # --- Query 1: Balloting history ---
+        ballot_query = f"""
+            SELECT
+                registration_year,
+                phase_normalised,
+                vacancy,
+                applied,
+                taken,
+                subscription_rate,
+                ballot_risk_level,
+                ballot_occurrences_last_3yr,
+                subscription_rate_3yr_avg
+            FROM `{PROJECT_ID}.{DATASET_ID}.mart_school_analysis`
+            WHERE UPPER(TRIM(school_name_clean)) = @school_name
+              AND registration_year >= 2022
+            ORDER BY registration_year DESC, phase_normalised
+            LIMIT 20
+        """
+        ballot_job = bq.QueryJobConfig(
+            query_parameters=[
+                bq.ScalarQueryParameter("school_name", "STRING", school_upper)
+            ]
         )
-    return "\n".join(lines)
+        ballot_rows = list(client.query(ballot_query, job_config=ballot_job).result())
+
+        if ballot_rows:
+            lines = [f"\n## Balloting History: {school_name}"]
+            for r in ballot_rows:
+                lines.append(
+                    f"  {r['registration_year']} Phase {r['phase_normalised']}: "
+                    f"vacancy={r['vacancy']}, applied={r['applied']}, "
+                    f"taken={r['taken']}, "
+                    f"subscription_rate={r['subscription_rate']}, "
+                    f"ballot_risk={r['ballot_risk_level']}, "
+                    f"ballot_occurrences_last_3yr={r['ballot_occurrences_last_3yr']}, "
+                    f"subscription_rate_3yr_avg={r['subscription_rate_3yr_avg']}"
+                )
+            school_sections.append("\n".join(lines))
+
+        # --- Query 2: School general info (joined dim_school + dim_school_generalinfo) ---
+        info_query = f"""
+            SELECT
+                s.school_name_clean,
+                s.address,
+                s.postal_code,
+                s.zone_code,
+                s.dgp_code,
+                s.type_code,
+                s.nature_code,
+                s.session_code,
+                s.sap_ind,
+                s.autonomous_ind,
+                s.gifted_ind,
+                s.ip_ind,
+                s.mothertongue1_code,
+                s.mothertongue2_code,
+                s.mothertongue3_code,
+                s.school_status,
+                s.school_status_description,
+                g.url_address,
+                g.mrt_desc,
+                g.bus_desc,
+                g.principal_name
+            FROM `{PROJECT_ID}.{DATASET_ID}.dim_school` s
+            LEFT JOIN `{PROJECT_ID}.{DATASET_ID}.dim_school_generalinfo` g
+                ON s.school_key = g.school_key
+            WHERE UPPER(TRIM(s.school_name_clean)) = @school_name
+            LIMIT 1
+        """
+        info_job = bq.QueryJobConfig(
+            query_parameters=[
+                bq.ScalarQueryParameter("school_name", "STRING", school_upper)
+            ]
+        )
+        info_rows = list(client.query(info_query, job_config=info_job).result())
+
+        if info_rows:
+            r = info_rows[0]
+            lines = [f"\n## School Information: {school_name}"]
+            lines.append(f"  Address: {r['address']}, Singapore {r['postal_code']}")
+            lines.append(f"  Zone: {r['zone_code']}, Estate: {r['dgp_code']}")
+            lines.append(f"  Type: {r['type_code']}, Nature: {r['nature_code']}")
+            lines.append(f"  Session: {r['session_code']}")
+            lines.append(
+                f"  Special programmes: "
+                f"SAP={r['sap_ind']}, GEP={r['gifted_ind']}, "
+                f"Autonomous={r['autonomous_ind']}, IP={r['ip_ind']}"
+            )
+            lines.append(
+                f"  Mother tongue: {r['mothertongue1_code']}"
+                + (f", {r['mothertongue2_code']}" if r['mothertongue2_code'] else "")
+            )
+            if r['mrt_desc']:
+                lines.append(f"  MRT: {r['mrt_desc']}")
+            if r['bus_desc']:
+                lines.append(f"  Bus: {r['bus_desc']}")
+            if r['principal_name']:
+                lines.append(f"  Principal: {r['principal_name']}")
+            if r['url_address']:
+                lines.append(f"  Website: {r['url_address']}")
+            lines.append(f"  Status: {r['school_status_description']}")
+            school_sections.append("\n".join(lines))
+
+        if school_sections:
+            sections.extend(school_sections)
+
+    return "\n".join(sections)
 
 
 # ── LLM Chain ─────────────────────────────────────────────────────────────────
@@ -165,7 +245,7 @@ def _get_chain():
 
 def run_advisor(
     question: str,
-    school_name: str | None = None,
+    school_names: list[str] | None = None,     # changed from school_name
     conversation_history: list[dict] | None = None,  # unused in Week 4
 ) -> dict:
     """
@@ -184,11 +264,11 @@ def run_advisor(
         for d in policy_docs
     ]
 
-    # 2. Fetch SQL school context if school_name provided
+    # 2. Fetch SQL school context if school_names provided
     school_context = "No specific school data requested."
     school_context_used = False
-    if school_name:
-        fetched = fetch_school_context(school_name)
+    if school_names:
+        fetched = fetch_school_context(school_names)
         if fetched:
             school_context = fetched
             school_context_used = True
