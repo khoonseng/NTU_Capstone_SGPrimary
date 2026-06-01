@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-[calc(100vh-10rem)]">
+  <div class="flex flex-col" style="min-height: 0;">
 
     <!-- Page header -->
     <div class="mb-4 shrink-0">
@@ -13,7 +13,8 @@
     <!-- Chat message area — fixed height, internal scroll -->
     <div
       ref="chatContainer"
-      class="flex-1 overflow-y-auto space-y-4 pb-4 pr-1 min-h-0"
+      class="overflow-y-auto space-y-4 pb-4 pr-1"
+      style="max-height: 55vh;"
     >
       <!-- Empty state with suggestion prompts -->
       <div
@@ -188,13 +189,23 @@
     >
       <!-- School multi-select -->
       <div>
-        <label class="block text-xs font-medium text-gray-700 mb-1">
-          (Optional) Compare schools
-          <span class="font-normal text-gray-700">
-            — select up to 3 schools to include their ballot history
-            and details in the response
-          </span>
-        </label>
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-xs font-medium text-gray-700">
+            (Optional) Compare schools
+            <span class="font-normal text-gray-700">
+              — select up to 3 schools to include their ballot history
+              and details in the response              
+            </span>
+          </label>
+          <button
+            v-if="selectedSchools.length > 0"
+            @click="selectedSchools = []"
+            class="text-xs text-blue-500 hover:text-blue-700
+                  transition-colors shrink-0 ml-2"
+          >
+            Clear Selections
+          </button>
+        </div>
         <MultiSelect
           v-model="selectedSchools"
           :options="schoolOptions"
