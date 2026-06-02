@@ -45,4 +45,6 @@ async def ask_advisor(request: AdvisorRequest):
         sources=[SourceDocument(**s) for s in result["sources"]],
         school_context_used=result["school_context_used"],
         disclaimer=result["disclaimer"],
+        # debug_best_distance=result["_debug_best_distance"],
+        # debug_school_names=result["_debug_school_names"],
     )

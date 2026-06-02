@@ -26,3 +26,5 @@ class AdvisorResponse(BaseModel):
     sources: list[SourceDocument]
     school_context_used: bool
     disclaimer: str
+    # debug_best_distance: float | None
+    # debug_school_names: list[str] | None

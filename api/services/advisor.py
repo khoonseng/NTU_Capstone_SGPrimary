@@ -26,8 +26,20 @@ Answer only questions related to Singapore primary school P1 registration, ballo
 school selection, and related topics. For questions outside this scope, politely \
 explain that you can only assist with P1 registration topics.
 
-Use the context below to answer the question. If the context does not contain enough \
-information to answer confidently, say so clearly rather than guessing.
+You must only use information from the context provided below. \
+Do not use your training knowledge to answer questions about specific schools, \
+school lists, or school attributes. If the context does not contain the answer, \
+say exactly: "I don't have that information in my knowledge base. For school \
+discovery by location or type, please use the Schools or Recommendations page \
+on this app.". Do not guess, infer, or supplement with outside knowledge.
+
+When school balloting data is provided, include it in your response to help parents \
+understand the specific schools they are considering. Always mention the most recent \
+year's vacancy, applied, taken, subscription rate and ballot risk for each phase. \
+If ballot risk is N/A, it means that the phase was not opened and signals high competition \
+because all vacancies were taken in the earlier phase. Present this information to parents in \
+a coherent manner instead of displaying N/A value which might confuse parents.
+
 
 MOE policy context:
 {policy_context}
@@ -90,6 +102,28 @@ def retrieve_policy_context(question: str, top_k: int = 3) -> list[Document]:
         filter={"domain": "moe_policy"},
     )
 
+# Threshold above which we consider the question out of knowledge base scope
+OUT_OF_SCOPE_DISTANCE = 0.65
+
+def retrieve_policy_context_with_scores(
+    question: str,
+    top_k: int = 3
+) -> tuple[list, float]:
+    """
+    Returns (docs, best_distance).
+    Uses similarity_search_with_score to get distance values.
+    """
+    store = _get_vector_store()
+    results = store.similarity_search_with_score(
+        query=question,
+        k=top_k,
+        filter={"domain": "moe_policy"},
+    )
+    if not results:
+        return [], 1.0
+    docs = [r[0] for r in results]
+    best_distance = min(r[1] for r in results)
+    return docs, best_distance
 
 def format_docs(docs: list[Document]) -> str:
     return "\n\n---\n\n".join(doc.page_content for doc in docs)
@@ -118,22 +152,32 @@ def fetch_school_context(school_names: list[str]) -> str:
 
         # --- Query 1: Balloting history ---
         ballot_query = f"""
+            WITH latest_year AS (
+                SELECT MAX(registration_year) AS max_year
+                FROM `{PROJECT_ID}.{DATASET_ID}.mart_school_analysis`
+                WHERE UPPER(TRIM(school_name_clean)) = @school_name
+            )
             SELECT
-                registration_year,
-                phase_normalised,
-                vacancy,
-                applied,
-                taken,
-                subscription_rate,
-                ballot_risk_level,
-                ballot_occurrences_last_3yr,
-                subscription_rate_3yr_avg
-            FROM `{PROJECT_ID}.{DATASET_ID}.mart_school_analysis`
-            WHERE UPPER(TRIM(school_name_clean)) = @school_name
-              AND registration_year >= 2022
-            ORDER BY registration_year DESC, phase_normalised
-            LIMIT 20
+                m.registration_year,
+                m.phase_normalised,
+                m.vacancy,
+                m.applied,
+                m.taken,
+                m.subscription_rate,
+                CASE 
+                    WHEN m.vacancy = 0
+                    THEN 'N/A' 
+                    
+                    ELSE
+                        m.ballot_risk_level
+
+                END as ballot_risk_level
+            FROM `{PROJECT_ID}.{DATASET_ID}.mart_school_analysis` m
+            JOIN latest_year l ON m.registration_year = l.max_year
+            WHERE UPPER(TRIM(m.school_name_clean)) = @school_name
+            ORDER BY m.phase_normalised
         """
+        
         ballot_job = bq.QueryJobConfig(
             query_parameters=[
                 bq.ScalarQueryParameter("school_name", "STRING", school_upper)
@@ -142,16 +186,16 @@ def fetch_school_context(school_names: list[str]) -> str:
         ballot_rows = list(client.query(ballot_query, job_config=ballot_job).result())
 
         if ballot_rows:
-            lines = [f"\n## Balloting History: {school_name}"]
+            year = ballot_rows[0]['registration_year']
+            lines = [f"\n## {year} Balloting Data: {school_name}"]
             for r in ballot_rows:
                 lines.append(
-                    f"  {r['registration_year']} Phase {r['phase_normalised']}: "
-                    f"vacancy={r['vacancy']}, applied={r['applied']}, "
+                    f"- Phase {r['phase_normalised']}: "
+                    f"vacancy={r['vacancy']}, "
+                    f"applied={r['applied']}, "
                     f"taken={r['taken']}, "
                     f"subscription_rate={r['subscription_rate']}, "
-                    f"ballot_risk={r['ballot_risk_level']}, "
-                    f"ballot_occurrences_last_3yr={r['ballot_occurrences_last_3yr']}, "
-                    f"subscription_rate_3yr_avg={r['subscription_rate_3yr_avg']}"
+                    f"ballot_risk={r['ballot_risk_level']}"
                 )
             school_sections.append("\n".join(lines))
 
@@ -231,7 +275,7 @@ def _get_chain():
     llm = ChatGroq(
         model=GROQ_MODEL,
         api_key=settings.groq_api_key,
-        max_tokens=500,
+        max_tokens=750,
         temperature=0.3,
     )
     prompt = ChatPromptTemplate.from_messages([
@@ -253,7 +297,31 @@ def run_advisor(
     Returns dict with answer, sources, school_context_used, disclaimer.
     """
     # 1. Retrieve policy context
-    policy_docs = retrieve_policy_context(question)
+    # policy_docs = retrieve_policy_context(question)
+
+    # 1. Retrieve policy context with distance check
+    policy_docs, best_distance = retrieve_policy_context_with_scores(question)
+    
+    # If no schools selected and retrieval quality is poor,
+    # return structured fallback without calling the LLM
+    if best_distance > OUT_OF_SCOPE_DISTANCE and not school_names:
+        return {
+            "answer": (
+                "I don't have specific information about that in my knowledge base. "
+                "For school discovery by location, type, or special programmes, "
+                "please use the Schools page on this app. "
+                "For ballot risk by area and phase, please use the Recommendations page."
+            ),
+            "sources": [],
+            "school_context_used": False,
+            "disclaimer": (
+                "This assessment is based on historical balloting data (2019–2025) "
+                "and MOE published guidelines. Always verify with MOE's official "
+                "P1 registration portal before making decisions."
+            ),
+        }
+
+
     policy_context = format_docs(policy_docs)
     sources = [
         {
@@ -281,6 +349,13 @@ def run_advisor(
         "school_context": school_context,
     })
 
+    # Append redirect sentence deterministically
+    if school_context_used:
+        answer += (
+            "\n\nFor full historical trend data across all years, "
+            "parents can visit the Recommendations page on this app."
+        )
+
     return {
         "answer": answer,
         "sources": sources,
@@ -290,4 +365,7 @@ def run_advisor(
             "and MOE published guidelines. Always verify with MOE's official "
             "P1 registration portal before making decisions."
         ),
+        # Temporary debug fields — remove before deployment
+        # "_debug_best_distance": round(best_distance, 4),
+        # "_debug_school_names": school_names,
     }
