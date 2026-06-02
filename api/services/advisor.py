@@ -1,4 +1,4 @@
-import os
+import logging
 from google.cloud import bigquery as bq
 # from langchain_google_community import BigQueryVectorSearch
 from langchain_google_community import BigQueryVectorStore
@@ -10,12 +10,13 @@ from langchain_core.documents import Document
 from api.services.embeddings import VertexGenAIEmbeddings
 from api.config import settings
 
+logger = logging.getLogger(__name__)
+
 # ── Constants ──────────────────────────────────────────────────────────────────
 PROJECT_ID = settings.gcp_project_id
 DATASET_ID = f"{settings.bq_dataset}_star"
 VECTOR_TABLE = "advisor_knowledge_base"
 LOCATION = "us-central1"
-GROQ_MODEL="llama-3.3-70b-versatile"
 EMBEDDINGS_MODEL="text-embedding-004"
 
 SYSTEM_PROMPT = """You are a helpful P1 school registration advisor for Singapore parents.
@@ -271,9 +272,29 @@ def fetch_school_context(school_names: list[str]) -> str:
 
 # ── LLM Chain ─────────────────────────────────────────────────────────────────
 
-def _get_chain():
+def _get_advisor_model_sequence() -> list[str]:
+    """
+    Returns primary model followed by fallback models, with duplicates removed.
+    """
+    raw_models = [
+        settings.advisor_primary_model,
+        *settings.advisor_fallback_models.split(","),
+    ]
+
+    models = []
+    seen = set()
+    for model in raw_models:
+        model_name = model.strip()
+        if model_name and model_name not in seen:
+            models.append(model_name)
+            seen.add(model_name)
+
+    return models
+
+
+def _get_chain(model_name: str):
     llm = ChatGroq(
-        model=GROQ_MODEL,
+        model=model_name,
         api_key=settings.groq_api_key,
         max_tokens=750,
         temperature=0.3,
@@ -283,6 +304,77 @@ def _get_chain():
         ("human", "{question}"),
     ])
     return prompt | llm | StrOutputParser()
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    """
+    LangChain wraps provider errors differently across versions, so inspect
+    both common attributes and the message text for Groq 429 failures.
+    """
+    status_code = getattr(exc, "status_code", None)
+    response = getattr(exc, "response", None)
+    if response is not None:
+        status_code = getattr(response, "status_code", status_code)
+
+    message = str(exc).lower()
+    return (
+        status_code == 429
+        or "rate_limit_exceeded" in message
+        or "rate limit" in message
+        or "status_code: 429" in message
+        or "429" in message and "too many requests" in message
+    )
+
+
+def _invoke_chain_with_model_fallback(
+    *,
+    question: str,
+    policy_context: str,
+    school_context: str,
+) -> tuple[str, str]:
+    """
+    Calls Groq with the configured model sequence.
+    Returns (answer, model_used). Retries only rate-limit failures.
+    """
+    model_sequence = _get_advisor_model_sequence()
+    if not model_sequence:
+        raise RuntimeError("No advisor Groq models configured.")
+
+    last_rate_limit_error = None
+    for index, model_name in enumerate(model_sequence):
+        try:
+            chain = _get_chain(model_name)
+            answer = chain.invoke({
+                "question": question,
+                "policy_context": policy_context,
+                "school_context": school_context,
+            })
+            if index > 0:
+                logger.info("Advisor Groq fallback succeeded with %s", model_name)
+            return answer, model_name
+        except Exception as exc:
+            if not _is_rate_limit_error(exc):
+                raise
+
+            last_rate_limit_error = exc
+            next_model = (
+                model_sequence[index + 1]
+                if index + 1 < len(model_sequence)
+                else None
+            )
+            if next_model:
+                logger.warning(
+                    "Advisor Groq model %s rate-limited; trying %s",
+                    model_name,
+                    next_model,
+                )
+            else:
+                logger.error("All advisor Groq models were rate-limited.")
+
+    if last_rate_limit_error:
+        raise last_rate_limit_error
+
+    raise RuntimeError("Advisor Groq model fallback failed unexpectedly.")
 
 
 # ── Public interface ───────────────────────────────────────────────────────────
@@ -342,12 +434,11 @@ def run_advisor(
             school_context_used = True
 
     # 3. Run the LangChain chain
-    chain = _get_chain()
-    answer = chain.invoke({
-        "question": question,
-        "policy_context": policy_context,
-        "school_context": school_context,
-    })
+    answer, model_used = _invoke_chain_with_model_fallback(
+        question=question,
+        policy_context=policy_context,
+        school_context=school_context,
+    )
 
     # Append redirect sentence deterministically
     if school_context_used:
@@ -365,6 +456,7 @@ def run_advisor(
             "and MOE published guidelines. Always verify with MOE's official "
             "P1 registration portal before making decisions."
         ),
+        "model_used": model_used,
         # Temporary debug fields — remove before deployment
         # "_debug_best_distance": round(best_distance, 4),
         # "_debug_school_names": school_names,

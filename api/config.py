@@ -23,6 +23,15 @@ class Settings(BaseSettings):
     gcp_project_id: str
     bq_dataset: str = "sg_moe_star"         # default to the star schema
     groq_api_key: str | None = None
+    advisor_primary_model: str = "llama-3.3-70b-versatile"
+    advisor_fallback_models: str = (
+        "openai/gpt-oss-120b,"
+        "meta-llama/llama-4-scout-17b-16e-instruct,"
+        "qwen/qwen3-32b,"
+        "openai/gpt-oss-20b,"
+        "llama-3.1-8b-instant"
+    )
+    advisor_show_model_used: bool = False
 
     # Optional: local dev uses GOOGLE_APPLICATION_CREDENTIALS file path.
     # Cloud Run uses ADC (Application Default Credentials) automatically —

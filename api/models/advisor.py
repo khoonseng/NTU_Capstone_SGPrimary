@@ -28,3 +28,4 @@ class AdvisorResponse(BaseModel):
     disclaimer: str
     # debug_best_distance: float | None
     # debug_school_names: list[str] | None
+    model_used: str | None = None

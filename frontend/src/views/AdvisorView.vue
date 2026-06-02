@@ -127,6 +127,13 @@
                 <span>✓</span>
                 <span>School data included</span>
               </div>
+
+              <p
+                v-if="!msg.loading && msg.modelUsed"
+                class="mt-2 text-xs italic text-gray-700"
+              >
+                Response was generated using model: {{ msg.modelUsed }}
+              </p>
             </div>
 
             <!-- Collapsible sources -->
@@ -377,6 +384,7 @@ async function askAdvisor() {
     showSlowWarning: false,
     showSources: false,
     error: null,
+    modelUsed: null,
   })
 
   question.value = ''
@@ -403,6 +411,7 @@ async function askAdvisor() {
     messages.value[msgIndex].sources = response.data.sources
     messages.value[msgIndex].schoolContextUsed =
       response.data.school_context_used
+    messages.value[msgIndex].modelUsed = response.data.model_used ?? null
 
   } catch (err) {
     messages.value[msgIndex].error =
