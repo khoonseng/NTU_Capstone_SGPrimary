@@ -368,7 +368,7 @@ async function askAdvisor() {
   if (currentSchools.length > 0) {
     augmentedQuestion =
       currentQuestion +
-      ` Please also provide specific ballot risk and school information ` +
+      ` Please also provide specific ballot information ` +
       `for the following schools: ${currentSchools.join(', ')}.`
   }
 
