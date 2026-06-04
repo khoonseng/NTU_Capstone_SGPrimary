@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 PROJECT_ID = settings.gcp_project_id
-DATASET_ID = f"{settings.bq_dataset}_star"
+DATASET_ID = (
+    settings.bq_dataset
+    if settings.bq_dataset.endswith("_star")
+    else f"{settings.bq_dataset}_star"
+)
 VECTOR_TABLE = "advisor_knowledge_base"
 LOCATION = "us-central1"
 EMBEDDINGS_MODEL="text-embedding-004"
@@ -628,6 +632,7 @@ def run_advisor(
     school_names: list[str] | None = None,     # changed from school_name
     conversation_history: list[dict] | None = None,  # unused in Week 4
 ) -> dict:
+    logger.warning("run_advisor called: question='%s' school_names=%s", question[:50], school_names)
     """
     Main entry point for the advisor service.
     Returns dict with answer, sources, school_context_used, disclaimer.
@@ -636,7 +641,9 @@ def run_advisor(
     # policy_docs = retrieve_policy_context(question)
 
     # 1. Retrieve policy context with distance check
+    logger.warning("Starting retrieve_policy_context_with_scores")
     policy_docs, best_distance = retrieve_policy_context_with_scores(question)
+    logger.warning("retrieve_policy_context_with_scores done: best_distance=%.4f", best_distance)
     
     # If no schools selected and retrieval quality is poor,
     # return structured fallback without calling the LLM
