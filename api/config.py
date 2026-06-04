@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     """
     gcp_project_id: str
     bq_dataset: str = "sg_moe_star"         # default to the star schema
+    groq_api_key: str | None = None
+    advisor_primary_model: str = "llama-3.3-70b-versatile"
+    advisor_fallback_models: str = (
+        "meta-llama/llama-4-scout-17b-16e-instruct,"
+        "llama-3.1-8b-instant,"
+        "qwen/qwen3-32b,"
+        "openai/gpt-oss-20b,"
+        "openai/gpt-oss-120b"
+    )
+    advisor_show_model_used: bool = False
 
     # Optional: local dev uses GOOGLE_APPLICATION_CREDENTIALS file path.
     # Cloud Run uses ADC (Application Default Credentials) automatically —
@@ -59,3 +69,6 @@ def get_bq_client() -> bigquery.Client:
     """
     settings = get_settings()
     return bigquery.Client(project=settings.gcp_project_id)
+
+# Module-level settings instance for direct import
+settings = get_settings()

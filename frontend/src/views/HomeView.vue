@@ -25,7 +25,7 @@
     </div>
 
     <!-- Use case cards -->
-    <div class="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2">
 
       <!-- Use case 1 -->
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
@@ -124,7 +124,39 @@
           Try this example
         </router-link>
       </div>
-
+      
+      <!-- Use case 4 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div class="text-2xl mb-3">🤖</div>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 leading-snug">Ask the P1 Advisor</h3>
+          <router-link to="/advisor"
+            class="inline-flex shrink-0 items-center justify-center rounded-md bg-indigo-600
+                  px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                  hover:bg-indigo-700 transition-colors">
+            Ask
+          </router-link>
+        </div>
+        <p class="text-xs text-gray-500 leading-relaxed mb-4">
+          Ask natural language questions about P1 registration phases, balloting rules,
+          distance priority, and school-specific ballot risk. Grounded in MOE guidelines
+          and historical balloting data.
+        </p>
+        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+          <p class="text-xs text-gray-400 font-medium mb-1">Example</p>
+          <p class="text-xs text-gray-600 leading-snug">
+            "I live in Seng Kang and I am a PR family. What are my options in Phase 2C?"
+          </p>
+        </div>
+        <router-link
+          :to="{ path: '/advisor' }"
+          class="inline-flex items-center justify-center rounded-md bg-amber-500
+                px-3 py-1.5 text-xs font-medium text-white shadow-sm
+                hover:bg-amber-600 transition-colors">
+          Try this example
+        </router-link>
+      </div>
+      
     </div>
 
     <!-- Phase coverage notice -->

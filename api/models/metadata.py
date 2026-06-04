@@ -15,9 +15,15 @@ API calls. Estates within each zone are sorted alphabetically.
 from pydantic import BaseModel
 
 
+class SchoolOption(BaseModel):
+    school_name: str
+    dgp_code: str | None = None
+
+
 class MetadataResponse(BaseModel):
     zones: list[str]                        # distinct zone_code values
     estates_by_zone: dict[str, list[str]]   # zone_code → sorted list of dgp_code
     all_estates: list[str]                  # all dgp_code values, sorted — for when no zone selected
     type_codes: list[str]                   # distinct type_code values
     nature_codes: list[str]                 # distinct nature_code values
+    schools: list[SchoolOption]

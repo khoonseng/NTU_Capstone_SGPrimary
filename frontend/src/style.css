@@ -34,3 +34,111 @@
     @apply text-sm text-gray-800;
   }
 }
+
+/* PrimeVue MultiSelect overrides — align with app theme */
+.p-multiselect {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.5rem !important;
+  color: #374151 !important;
+}
+
+.p-multiselect:focus,
+.p-multiselect.p-focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #3b82f6 !important;
+  border-color: transparent !important;
+}
+
+.p-multiselect-label {
+  color: #374151 !important;
+  font-size: 0.875rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.p-multiselect-label.p-placeholder {
+  color: #9ca3af !important;
+}
+
+/* .p-multiselect-overlay {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  /* Fix mobile overflow */
+/*  max-width: calc(100vw - 2rem) !important;
+  width: 100% !important;
+}
+
+.p-multiselect-filter-input {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.875rem !important;
+  padding: 0.375rem 0.75rem !important;
+  width: 100% !important;
+} */
+
+.p-multiselect-overlay {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Mobile only — prevent overlay from overflowing viewport */
+@media (max-width: 639px) {
+  .p-multiselect-overlay {
+    max-width: calc(100vw - 2rem) !important;
+    width: calc(100vw - 2rem) !important;
+  }
+}
+
+.p-multiselect-filter-input,
+.p-multiselect-filter input,
+.p-multiselect-header input,
+input.p-multiselect-filter {
+  background-color: #ffffff !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.875rem !important;
+  padding: 0.375rem 0.75rem !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+
+.p-multiselect-filter-input:focus,
+.p-multiselect-filter input:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.p-multiselect-option {
+  color: #374151 !important;
+  font-size: 0.875rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.p-multiselect-option:hover,
+.p-multiselect-option.p-focus {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+.p-multiselect-option.p-selected {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.p-checkbox .p-checkbox-box {
+  border-color: #d1d5db !important;
+  background-color: #ffffff !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}

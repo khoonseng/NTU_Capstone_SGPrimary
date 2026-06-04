@@ -45,12 +45,10 @@ def get_metadata() -> dict:
 
     rows = run_query(sql)
 
-    # zones = sorted({r["zone_code"] for r in rows if r["zone_code"]})
     zone_set = {r["zone_code"] for r in rows if r["zone_code"]}
     zones = [z for z in ZONE_ORDER if z in zone_set]
     all_estates = sorted({r["dgp_code"] for r in rows if r["dgp_code"]})
     type_codes = sorted({r["type_code"] for r in rows if r.get("type_code")})
-    # nature_codes = sorted({r["nature_code"] for r in rows if r.get("nature_code")})
     nature_set = {r["nature_code"] for r in rows if r["nature_code"]}
     nature_codes = [n for n in NATURE_ORDER if n in nature_set]
 
@@ -60,10 +58,28 @@ def get_metadata() -> dict:
             {r["dgp_code"] for r in rows if r["zone_code"] == zone and r["dgp_code"]}
         )
 
+    # New query — active schools for advisor autocomplete
+    school_sql = f"""
+        SELECT
+            school_name_clean AS school_name,
+            dgp_code
+        FROM `{dataset}.dim_school`
+        WHERE is_active = TRUE
+          AND dgp_code IS NOT NULL
+          AND dgp_code <> 'UNKNOWN'
+        ORDER BY school_name_clean ASC
+    """
+    school_rows = run_query(school_sql)
+    schools = [
+        {"school_name": r["school_name"], "dgp_code": r["dgp_code"]}
+        for r in school_rows
+    ]
+
     return {
         "zones": zones,
         "estates_by_zone": estates_by_zone,
         "all_estates": all_estates,
         "type_codes": type_codes,
         "nature_codes": nature_codes,
+        "schools": schools,                
     }
