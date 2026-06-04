@@ -676,10 +676,10 @@ def run_advisor(
         classification = classify_school_data_needed(question)
         context_parts = []
 
-        if classification["needs_ballot"]:
-            ballot_ctx = fetch_ballot_history(school_names)
-            if ballot_ctx:
-                context_parts.append(ballot_ctx)
+        # if classification["needs_ballot"]:
+        ballot_ctx = fetch_ballot_history(school_names)
+        if ballot_ctx:
+            context_parts.append(ballot_ctx)
 
         if classification["needs_attributes"]:
             attr_ctx = fetch_school_attributes(school_names)
