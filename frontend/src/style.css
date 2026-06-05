@@ -142,3 +142,36 @@ input.p-multiselect-filter {
   background-color: #2563eb !important;
   border-color: #2563eb !important;
 }
+
+/* Prevent iOS Safari auto-zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* MultiSelect option checkbox tick — CSS-drawn to bypass mobile font rendering */
+/* Scoped tightly to avoid affecting other PrimeVue checkboxes on other pages */
+.p-multiselect-overlay .p-checkbox-box {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  border-radius: 4px !important;
+}
+
+.p-multiselect-overlay .p-checkbox-box.p-highlight::after {
+  content: '' !important;
+  position: absolute !important;
+  display: block !important;
+  width: 4px !important;
+  height: 8px !important;
+  border: 2px solid #ffffff !important;
+  border-top: none !important;
+  border-left: none !important;
+  transform: rotate(45deg) translateY(-1px) !important;
+  z-index: 1 !important;
+}
