@@ -97,15 +97,19 @@ def main():
 
     # Clear existing moe_policy rows — ensures re-runs are idempotent
     print(f"Clearing existing '{DOMAIN}' rows from {TABLE_ID} ...")
-    bq_client.query(
-        f"DELETE FROM `{TABLE_ID}` WHERE domain = @domain",
-        job_config=bigquery.QueryJobConfig(
-            query_parameters=[
-                bigquery.ScalarQueryParameter("domain", "STRING", DOMAIN)
-            ]
-        ),
-    ).result()
-    print("Cleared.\n")
+    # bq_client.query(
+    #     f"DELETE FROM `{TABLE_ID}` WHERE domain = @domain",
+    #     job_config=bigquery.QueryJobConfig(
+    #         query_parameters=[
+    #             bigquery.ScalarQueryParameter("domain", "STRING", DOMAIN)
+    #         ]
+    #     ),
+    # ).result()
+    # print("Cleared.\n")
+
+    # New — TRUNCATE bypasses streaming buffer restriction:
+    bq_client.query(f"TRUNCATE TABLE `{TABLE_ID}`").result()
+    print("Cleared all rows via TRUNCATE")
 
     md_files = sorted(
         f for f in KB_DIR.glob("*.md")

@@ -239,11 +239,39 @@
               class="text-gray-400 text-sm">
               Search and select schools...
             </span>
-            <span v-else class="text-sm text-gray-700">
+            <!-- <span v-else class="text-sm text-gray-700">
               {{ value.join(', ') }}
+            </span> -->
+            <span v-else class="text-sm text-gray-700">
+              {{ value.length }} school{{ value.length > 1 ? 's' : '' }} selected
             </span>
           </template>
         </MultiSelect>
+        
+        <!-- Add this immediately after the MultiSelect closing tag -->
+        <div
+          v-if="selectedSchools.length > 0"
+          class="mt-1.5 space-y-1"
+        >
+          <div
+            v-for="(name, index) in selectedSchools"
+            :key="name"
+            class="flex items-center justify-between bg-blue-50 border
+                  border-blue-100 rounded-lg px-3 py-1.5"
+          >
+            <span class="text-xs text-blue-800 leading-snug">
+              {{ index + 1 }}. {{ name }}
+            </span>
+            <button
+              @click.stop="removeSchool(name)"
+              class="text-blue-400 hover:text-blue-700 ml-2 shrink-0
+                    text-xs font-medium"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
         <p
           v-if="selectedSchools.length === 3"
           class="text-xs text-amber-600 mt-1"
@@ -355,6 +383,10 @@ async function scrollToBottom() {
   if (chatContainer.value) {
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight
   }
+}
+
+function removeSchool(name) {
+  selectedSchools.value = selectedSchools.value.filter(s => s !== name)
 }
 
 async function askAdvisor() {

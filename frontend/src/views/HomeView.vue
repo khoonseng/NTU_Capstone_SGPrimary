@@ -142,7 +142,7 @@
           distance priority, and school-specific ballot risk. Grounded in MOE guidelines
           and historical balloting data.
         </p>
-        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+        <!-- <div class="bg-gray-50 rounded-lg p-3 mb-4">
           <p class="text-xs text-gray-400 font-medium mb-1">Example</p>
           <p class="text-xs text-gray-600 leading-snug">
             "I live in Seng Kang and I am a PR family. What are my options in Phase 2C?"
@@ -154,7 +154,7 @@
                 px-3 py-1.5 text-xs font-medium text-white shadow-sm
                 hover:bg-amber-600 transition-colors">
           Try this example
-        </router-link>
+        </router-link> -->
       </div>
       
     </div>
