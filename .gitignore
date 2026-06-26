@@ -231,3 +231,8 @@ frontend/node_modules
 # Firebase
 firebase-debug.log
 .firebase/
+
+# Claude
+.claude/
+claude_skills/
+CLAUDE.md
