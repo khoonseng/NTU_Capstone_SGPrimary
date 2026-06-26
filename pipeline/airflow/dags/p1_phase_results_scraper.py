@@ -6,7 +6,7 @@ dbt build, then validates the row count.
 
 Trigger via Airflow UI:
     DAGs → p1_phase_results_scraper → Trigger DAG w/ config
-    Config: {"year": 2026, "phase": "2C"}
+    Config: {"year": 2026}
 
 Phase result dates (2026):
     Phase 1      — 8 July
@@ -42,12 +42,12 @@ with DAG(
             type="integer",
             description="Registration year to scrape (e.g. 2026)",
         ),
-        "phase": Param(
-            "2C",
-            type="string",
-            description="Phase result just published — used for audit trail and validation",
-            enum=["1", "2A", "2B", "2C", "2C(S)"],
-        ),
+        # "phase": Param(
+        #     "2C",
+        #     type="string",
+        #     description="Phase result just published — used for audit trail and validation",
+        #     enum=["1", "2A", "2B", "2C", "2C(S)"],
+        # ),
     },
 ) as dag:
 
@@ -103,17 +103,16 @@ from google.cloud import bigquery
 project = os.environ['GCP_PROJECT_ID']
 dataset = os.environ['BQ_DATASET']
 year    = {{ params.year }}
-phase   = '{{ params.phase }}'
 
 client  = bigquery.Client(project=project)
 sql     = (
     'SELECT COUNT(*) AS cnt '
     'FROM `' + project + '.' + dataset + '.raw_sgschooling_balloting` '
-    'WHERE year = ' + str(year)
+    'WHERE registration_year = ' + str(year)
 )
 row = next(client.query(sql).result())
 cnt = row['cnt']
-print(f'raw_sgschooling_balloting year={year} phase={phase}: {cnt} rows')
+print(f'raw_sgschooling_balloting year={year}: {cnt} rows')
 if cnt == 0:
     print(f'ERROR: No rows found for year {year}. Scrape or load may have failed.')
     sys.exit(1)
