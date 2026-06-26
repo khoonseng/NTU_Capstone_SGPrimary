@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from google.cloud import bigquery
 
 # .env is at the project root — 4 levels up from pipeline/streaming/producer/
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+load_dotenv(Path(__file__).resolve().parents[4] / ".env")
 
 GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID", "test-sg-moe")
 _BQ_DATASET    = os.getenv("BQ_DATASET", "sg_moe_star")

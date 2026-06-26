@@ -1,8 +1,9 @@
 # Dependencies baked into the custom Airflow image.
 # Versions pinned to match the sgprimary conda environment (environment.yml).
 #
+# dbt-core pinned to 1.10.9 (matches local env) — dbt-bigquery 1.10.3 has no upper
+# bound on dbt-core, so pip resolves to 2.0.x which has breaking schema.yml changes.
 # google-cloud-storage pinned to 3.1.0 — dbt-bigquery 1.10.3 requires <3.2.0.
-# Upgrading storage without upgrading dbt-bigquery will break dbt builds.
 
 requests==2.32.5
 beautifulsoup4==4.14.2
@@ -11,4 +12,5 @@ pandas==2.3.3
 python-dotenv==1.1.0
 google-cloud-bigquery==3.41.0
 google-cloud-storage==3.1.0
+dbt-core==1.10.9
 dbt-bigquery==1.10.3
