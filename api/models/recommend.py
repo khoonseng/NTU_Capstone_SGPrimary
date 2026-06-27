@@ -96,6 +96,18 @@ class RecommendResponseNoPhase(BaseModel):
 # Mode 2 — phase selected
 # One SchoolRecommendation per school (for the selected phase)
 # ---------------------------------------------------------------------------
+
+class InterimSnapshot(BaseModel):
+    """Latest vacancy snapshot from the Kafka streaming pipeline."""
+    simulation_day: int
+    snapshot_type: str        # "midday" or "end_of_day"
+    snapshot_timestamp: str   # ISO 8601, SGT offset e.g. 2026-07-27T18:00:00+08:00
+    vacancy_at_open: int
+    vacancy_remaining: int
+    applied_count: int
+    pct_filled: float         # 0.0–1.0
+
+
 class TrendData(BaseModel):
     ballot_occurrences_last_3yr: int | None
     ballot_occurrences_last_5yr: int | None
@@ -118,6 +130,7 @@ class SchoolRecommendation(BaseModel):
     trend: TrendData
     history: list[BallotYearRecord]         # last 3 years + 2026 if available
     reference_years: list[int]              # derived from non-current-year history rows
+    interim: InterimSnapshot | None = None  # latest Kafka snapshot; None if not yet produced
 
 
 class QueryEchoWithPhase(BaseModel):

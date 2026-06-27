@@ -7,3 +7,4 @@ sources:
     tables:
       - name: raw_schools
       - name: raw_sgschooling_balloting
+      - name: raw_p1_vacancy_snapshots

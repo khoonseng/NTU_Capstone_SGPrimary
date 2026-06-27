@@ -510,7 +510,7 @@
             <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
               {{ yr.registration_year }}
               <span v-if="yr.is_current_year" class="normal-case font-normal">
-                (current year — pending data)
+                (current year — pending official data)
               </span>
             </p>
 
@@ -656,6 +656,64 @@
             </template>
           </div>
         </div>
+
+        <!-- Interim snapshot from Kafka streaming pipeline -->
+        <div v-if="school.interim" class="mt-4 pt-4 border-t border-teal-100">
+          <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
+            {{ new Date().getFullYear() }}
+            <span class="normal-case font-normal">(current year — interim data)</span>
+          </p>
+          <div class="bg-teal-50 border border-teal-100 rounded-lg p-3">
+            <p class="text-xs text-teal-600 mb-3">
+              Simulated real-time data
+              · Day {{ school.interim.simulation_day }}
+              · {{ school.interim.snapshot_type === 'end_of_day' ? 'End of day' : 'Midday' }}
+            </p>
+            <!-- Desktop -->
+            <div class="hidden sm:grid sm:grid-cols-4 sm:gap-2 sm:text-center">
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Vacancy at Open</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Applied</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Remaining</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">% Filled</p>
+                <p class="text-sm font-semibold text-teal-900">
+                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
+                </p>
+              </div>
+            </div>
+            <!-- Mobile 2×2 -->
+            <div class="sm:hidden grid grid-cols-2 gap-2 text-center">
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Vacancy at Open</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Applied</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Remaining</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">% Filled</p>
+                <p class="text-sm font-semibold text-teal-900">
+                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 

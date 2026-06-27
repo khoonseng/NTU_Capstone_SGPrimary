@@ -166,6 +166,61 @@ def _to_ballot_year(row: dict, is_current_year: bool) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Interim snapshots — Kafka streaming data
+# ---------------------------------------------------------------------------
+
+def fetch_vacancy_interim(
+    zone_code: str | None,
+    dgp_code: str | None,
+    phase: str,
+    current_year: int,
+) -> dict[str, dict]:
+    """
+    Returns the latest vacancy snapshot per school from mart_vacancy_interim,
+    filtered by zone/estate/phase/year.
+
+    Mirrors the location filter pattern of the main recommend query — no school
+    name list needed. Returns a dict keyed by school_name; empty dict if the
+    mart has no rows (producer not run, or dbt build not yet run after replay).
+
+    snapshot_timestamp formatted as ISO 8601 SGT for frontend display.
+    """
+    dataset = get_dataset()
+    params: list = [
+        bigquery.ScalarQueryParameter("phase", "STRING", phase),
+        bigquery.ScalarQueryParameter("year", "INT64", current_year),
+    ]
+    conditions = ["phase = @phase", "registration_year = @year"]
+
+    if zone_code:
+        conditions.append("UPPER(zone_code) = UPPER(@zone_code)")
+        params.append(bigquery.ScalarQueryParameter("zone_code", "STRING", zone_code))
+    if dgp_code:
+        conditions.append("UPPER(dgp_code) = UPPER(@dgp_code)")
+        params.append(bigquery.ScalarQueryParameter("dgp_code", "STRING", dgp_code))
+
+    where_clause = " AND ".join(conditions)
+
+    sql = f"""
+        SELECT
+            school_name,
+            simulation_day,
+            snapshot_type,
+            FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%S%Ez', snapshot_timestamp, 'Asia/Singapore')
+                AS snapshot_timestamp,
+            vacancy_at_open,
+            vacancy_remaining,
+            applied_count,
+            pct_filled
+        FROM `{dataset}.mart_vacancy_interim`
+        WHERE {where_clause}
+    """
+
+    rows = run_query(sql, params)
+    return {row["school_name"]: row for row in rows}
+
+
+# ---------------------------------------------------------------------------
 # Mode 1 — no phase selected
 # ---------------------------------------------------------------------------
 
@@ -610,7 +665,14 @@ def get_recommendations_with_phase(
     """
 
     rows = run_query(sql, params)
-    return _assemble_with_phase(rows, phase, current_year)
+    result = _assemble_with_phase(rows, phase, current_year)
+
+    # Enrich each school with its latest Kafka snapshot (None if not yet produced).
+    interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
+    for school in result:
+        school["interim"] = interim_by_school.get(school["school_name"])
+
+    return result
 
 
 def _assemble_with_phase(rows: list[dict], phase: str, current_year: int) -> list[dict]:
