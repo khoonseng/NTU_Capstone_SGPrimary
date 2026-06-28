@@ -224,6 +224,9 @@ keys/
 # connections
 sg_primary_dbt/profiles.yml
 
+# ML model artifacts
+ml/model/
+
 # Frontend
 frontend/dist
 frontend/node_modules

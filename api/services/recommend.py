@@ -167,32 +167,66 @@ def _to_ballot_year(row: dict, is_current_year: bool) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# ML predictions — pre-computed LightGBM subscription rate predictions
+# ---------------------------------------------------------------------------
+
+def fetch_ml_predictions(
+    current_year: int,
+    phase: str | None = None,
+) -> dict[tuple[str, str], dict]:
+    """
+    Returns pre-computed ML predictions keyed by (school_name, phase).
+    phase=None fetches all competitive phases (Mode 1).
+    phase=str fetches for a single phase (Mode 2).
+    Returns empty dict if mart_ml_predictions does not exist or has no rows.
+    """
+    dataset = get_dataset()
+    params: list = [bigquery.ScalarQueryParameter("year", "INT64", current_year)]
+    where = "registration_year = @year"
+    if phase:
+        where += " AND phase = @phase"
+        params.append(bigquery.ScalarQueryParameter("phase", "STRING", phase))
+    sql = f"""
+        SELECT school_name, phase, predicted_subscription_rate, predicted_ballot_chance_pct
+        FROM `{dataset}.mart_ml_predictions`
+        WHERE {where}
+    """
+    try:
+        rows = run_query(sql, params)
+        return {(row["school_name"], row["phase"]): row for row in rows}
+    except Exception:
+        return {}
+
+
+# ---------------------------------------------------------------------------
 # Interim snapshots — Kafka streaming data
 # ---------------------------------------------------------------------------
 
 def fetch_vacancy_interim(
     zone_code: str | None,
     dgp_code: str | None,
-    phase: str,
+    phase: str | None,
     current_year: int,
-) -> dict[str, dict]:
+) -> dict[tuple[str, str], dict]:
     """
     Returns the latest vacancy snapshot per school from mart_vacancy_interim,
-    filtered by zone/estate/phase/year.
+    filtered by zone/estate/year and optionally by phase.
 
-    Mirrors the location filter pattern of the main recommend query — no school
-    name list needed. Returns a dict keyed by school_name; empty dict if the
-    mart has no rows (producer not run, or dbt build not yet run after replay).
+    phase=None fetches all competitive phases (Mode 1).
+    phase=str fetches for a single phase (Mode 2).
+
+    Returns a dict keyed by (school_name, phase); empty dict if the mart has
+    no rows (producer not run, or dbt build not yet run after replay).
 
     snapshot_timestamp formatted as ISO 8601 SGT for frontend display.
     """
     dataset = get_dataset()
-    params: list = [
-        bigquery.ScalarQueryParameter("phase", "STRING", phase),
-        bigquery.ScalarQueryParameter("year", "INT64", current_year),
-    ]
-    conditions = ["phase = @phase", "registration_year = @year"]
+    params: list = [bigquery.ScalarQueryParameter("year", "INT64", current_year)]
+    conditions = ["registration_year = @year"]
 
+    if phase:
+        conditions.append("phase = @phase")
+        params.append(bigquery.ScalarQueryParameter("phase", "STRING", phase))
     if zone_code:
         conditions.append("UPPER(zone_code) = UPPER(@zone_code)")
         params.append(bigquery.ScalarQueryParameter("zone_code", "STRING", zone_code))
@@ -205,6 +239,7 @@ def fetch_vacancy_interim(
     sql = f"""
         SELECT
             school_name,
+            phase,
             simulation_day,
             snapshot_type,
             FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%S%Ez', snapshot_timestamp, 'Asia/Singapore')
@@ -218,7 +253,7 @@ def fetch_vacancy_interim(
     """
 
     rows = run_query(sql, params)
-    return {row["school_name"]: row for row in rows}
+    return {(row["school_name"], row["phase"]): row for row in rows}
 
 
 # ---------------------------------------------------------------------------
@@ -360,7 +395,33 @@ def get_recommendations_no_phase(
     """
 
     rows = run_query(sql, params)
-    return _assemble_no_phase(rows, current_year)
+    result = _assemble_no_phase(rows, current_year)
+
+    if get_app_config_flag("show_ml_predictions"):
+        ml_preds = fetch_ml_predictions(current_year)
+        for school in result:
+            for phase_entry in school["phases"]:
+                phase_entry["ml_prediction"] = ml_preds.get(
+                    (school["school_name"], phase_entry["phase"])
+                )
+    else:
+        for school in result:
+            for phase_entry in school["phases"]:
+                phase_entry["ml_prediction"] = None
+
+    if get_app_config_flag("show_interim_data"):
+        interim_by_phase = fetch_vacancy_interim(zone_code, dgp_code, None, current_year)
+        for school in result:
+            for phase_entry in school["phases"]:
+                phase_entry["interim"] = interim_by_phase.get(
+                    (school["school_name"], phase_entry["phase"])
+                )
+    else:
+        for school in result:
+            for phase_entry in school["phases"]:
+                phase_entry["interim"] = None
+
+    return result
 
 
 def _assemble_no_phase(rows: list[dict], current_year: int) -> list[dict]:
@@ -668,20 +729,25 @@ def get_recommendations_with_phase(
     rows = run_query(sql, params)
     result = _assemble_with_phase(rows, phase, current_year)
 
-    # Enrich each school with its latest Kafka snapshot when the feature flag is on.
-    # Toggle via: UPDATE `sg_moe.app_config` SET config_value = 'true' WHERE config_key = 'show_interim_data'
+    # Interim Kafka snapshot — only when feature flag is enabled.
+    # Toggle via: UPDATE `sg_moe_seeds.app_config` SET config_value = 'true' WHERE config_key = 'show_interim_data'
     if get_app_config_flag("show_interim_data"):
         interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
         for school in result:
-            school["interim"] = interim_by_school.get(school["school_name"])
-    # else:
-    #     for school in result:
-    #         school["interim"] = None
+            school["interim"] = interim_by_school.get((school["school_name"], phase))
+    else:
+        for school in result:
+            school["interim"] = None
 
-    # Enrich each school with its latest Kafka snapshot (None if not yet produced).
-    # interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
-    # for school in result:
-    #     school["interim"] = interim_by_school.get(school["school_name"])
+    # ML predictions — pre-computed LightGBM subscription rate for current year.
+    # Toggle via: UPDATE `sg_moe_seeds.app_config` SET config_value = 'true' WHERE config_key = 'show_ml_predictions'
+    if get_app_config_flag("show_ml_predictions"):
+        ml_preds = fetch_ml_predictions(current_year, phase)
+        for school in result:
+            school["ml_prediction"] = ml_preds.get((school["school_name"], phase))
+    else:
+        for school in result:
+            school["ml_prediction"] = None
 
     return result
 
