@@ -61,12 +61,34 @@ class SchoolAttributes(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Shared — used in both Mode 1 (per phase) and Mode 2 (per school-phase)
+# ---------------------------------------------------------------------------
+class MLPrediction(BaseModel):
+    """Pre-computed LightGBM prediction for the current registration year."""
+    predicted_subscription_rate: float | None
+    predicted_ballot_chance_pct: float | None
+
+
+class InterimSnapshot(BaseModel):
+    """Latest vacancy snapshot from the Kafka streaming pipeline."""
+    simulation_day: int
+    snapshot_type: str        # "midday" or "end_of_day"
+    snapshot_timestamp: str   # ISO 8601, SGT offset e.g. 2026-07-27T18:00:00+08:00
+    vacancy_at_open: int
+    vacancy_remaining: int
+    applied_count: int
+    pct_filled: float         # 0.0–1.0
+
+
+# ---------------------------------------------------------------------------
 # Mode 1 — no phase selected
 # One PhaseLatestYear per phase nested inside SchoolSummary
 # ---------------------------------------------------------------------------
 class PhaseLatestYear(BaseModel):
     phase: str
     years: list[BallotYearRecord]           # most recent completed year + 2026 if available
+    ml_prediction: MLPrediction | None = None
+    interim: InterimSnapshot | None = None
 
 
 class SchoolSummary(BaseModel):
@@ -97,17 +119,6 @@ class RecommendResponseNoPhase(BaseModel):
 # One SchoolRecommendation per school (for the selected phase)
 # ---------------------------------------------------------------------------
 
-class InterimSnapshot(BaseModel):
-    """Latest vacancy snapshot from the Kafka streaming pipeline."""
-    simulation_day: int
-    snapshot_type: str        # "midday" or "end_of_day"
-    snapshot_timestamp: str   # ISO 8601, SGT offset e.g. 2026-07-27T18:00:00+08:00
-    vacancy_at_open: int
-    vacancy_remaining: int
-    applied_count: int
-    pct_filled: float         # 0.0–1.0
-
-
 class TrendData(BaseModel):
     ballot_occurrences_last_3yr: int | None
     ballot_occurrences_last_5yr: int | None
@@ -130,7 +141,8 @@ class SchoolRecommendation(BaseModel):
     trend: TrendData
     history: list[BallotYearRecord]         # last 3 years + 2026 if available
     reference_years: list[int]              # derived from non-current-year history rows
-    interim: InterimSnapshot | None = None  # latest Kafka snapshot; None if not yet produced
+    interim: InterimSnapshot | None = None      # latest Kafka snapshot; None if not yet produced
+    ml_prediction: MLPrediction | None = None  # pre-computed LightGBM prediction; None if model not yet run
 
 
 class QueryEchoWithPhase(BaseModel):

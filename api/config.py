@@ -76,39 +76,43 @@ settings = get_settings()
 
 
 # ---------------------------------------------------------------------------
-# Feature flags — read from sg_moe.app_config with a 60-second TTL cache.
+# Feature flags — read from sg_moe_seeds.app_config with a 60-second TTL cache.
+# BigQuery infers the config_value column as BOOL from the dbt seed CSV.
 # Toggle via BigQuery console:
-#   UPDATE `<project>.sg_moe.app_config`
-#   SET config_value = 'true', updated_at = CURRENT_TIMESTAMP()
+#   UPDATE `<project>.sg_moe_seeds.app_config`
+#   SET config_value = true
 #   WHERE config_key = 'show_interim_data'
 # ---------------------------------------------------------------------------
 
-_config_cache: dict[str, tuple[str, float]] = {}
+_config_cache: dict[str, bool] = {}
+_config_cache_expires_at: float = 0.0
 _CONFIG_TTL = 60.0  # seconds
 
 
-def get_app_config_flag(key: str, default: str = "false") -> str:
+def get_app_config_flag(key: str, default: bool = False) -> bool:
     """
-    Returns the value of a feature flag from sg_moe.app_config.
-    Caches the result for 60 seconds to avoid a BQ query on every request.
+    Returns the value of a feature flag from sg_moe_seeds.app_config.
+
+    All flags are loaded in a single BQ query on cache miss so that multiple
+    flag reads within one request only cost one round trip. The full table is
+    cached for 60 seconds — subsequent calls within that window are local dict
+    lookups with no BQ overhead.
+
     Returns `default` if the key does not exist in the table.
     """
+    global _config_cache_expires_at
     now = time.monotonic()
-    cached = _config_cache.get(key)
-    if cached and now < cached[1]:
-        return cached[0]
+    if now < _config_cache_expires_at:
+        return _config_cache.get(key, default)
 
     client = get_bq_client()
     sql = f"""
-        SELECT config_value
+        SELECT config_key, config_value
         FROM `{settings.gcp_project_id}.sg_moe_seeds.app_config`
-        WHERE config_key = @key
-        LIMIT 1
     """
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[bigquery.ScalarQueryParameter("key", "STRING", key)]
-    )
-    rows = list(client.query(sql, job_config=job_config).result())
-    value = rows[0]["config_value"] if rows else default
-    _config_cache[key] = (value, now + _CONFIG_TTL)
-    return value
+    rows = list(client.query(sql).result())
+    _config_cache.clear()
+    for row in rows:
+        _config_cache[row["config_key"]] = bool(row["config_value"])
+    _config_cache_expires_at = now + _CONFIG_TTL
+    return _config_cache.get(key, default)

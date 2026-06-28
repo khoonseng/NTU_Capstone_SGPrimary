@@ -382,6 +382,52 @@
                   <!-- <span class="badge bg-gray-100 text-gray-400">N/A</span> -->
                 </div>
               </template>
+
+              <!-- ML prediction — shown for both opened and not-opened phases -->
+              <div v-if="phaseData.ml_prediction" class="mt-2 bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+                <p class="text-xs font-medium text-indigo-700 mb-2">{{ new Date().getFullYear() }} Prediction</p>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                  <div>
+                    <p class="text-xs text-indigo-500 mb-0.5">Predicted Subscription Rate</p>
+                    <p class="text-sm font-semibold text-indigo-900">
+                      {{ phaseData.ml_prediction.predicted_subscription_rate != null
+                        ? phaseData.ml_prediction.predicted_subscription_rate.toFixed(2) + 'x' : '—' }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-indigo-500 mb-0.5">Predicted Entry Chance</p>
+                    <p class="text-sm font-semibold text-indigo-900">
+                      {{ phaseData.ml_prediction.predicted_ballot_chance_pct != null
+                        ? (phaseData.ml_prediction.predicted_ballot_chance_pct * 100).toFixed(1) + '%' : '—' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="phaseData.interim" class="mt-2 bg-teal-50 border border-teal-100 rounded-lg p-3">
+                <p class="text-xs text-teal-600 mb-3">
+                  Simulated real-time data · Day {{ phaseData.interim.simulation_day }}
+                  · {{ phaseData.interim.snapshot_type === 'end_of_day' ? 'End of day' : 'Midday' }}
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
+                  <div>
+                    <p class="text-xs text-teal-500 mb-0.5">Vacancies at Open</p>
+                    <p class="text-sm font-semibold text-teal-900">{{ phaseData.interim.vacancy_at_open }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-teal-500 mb-0.5">Applied</p>
+                    <p class="text-sm font-semibold text-teal-900">{{ phaseData.interim.applied_count }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-teal-500 mb-0.5">Remaining</p>
+                    <p class="text-sm font-semibold text-teal-900">{{ phaseData.interim.vacancy_remaining }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-teal-500 mb-0.5">% Filled</p>
+                    <p class="text-sm font-semibold text-teal-900">{{ (phaseData.interim.pct_filled * 100).toFixed(1) }}%</p>
+                  </div>
+                </div>
+              </div>
             </template>
 
           </div>
@@ -477,6 +523,24 @@
                 </p>
               </div>
             </div>
+
+            <!-- ML prediction boxes -->
+            <div v-if="school.ml_prediction" class="grid grid-cols-2 gap-2 mt-2">
+              <div class="bg-indigo-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-indigo-500 mb-1">Predicted Subscription Rate</p>
+                <p class="text-sm font-semibold text-indigo-900">
+                  {{ school.ml_prediction.predicted_subscription_rate != null
+                    ? school.ml_prediction.predicted_subscription_rate.toFixed(2) + 'x' : '—' }}
+                </p>
+              </div>
+              <div class="bg-indigo-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-indigo-500 mb-1">Predicted Entry Chance</p>
+                <p class="text-sm font-semibold text-indigo-900">
+                  {{ school.ml_prediction.predicted_ballot_chance_pct != null
+                    ? (school.ml_prediction.predicted_ballot_chance_pct * 100).toFixed(1) + '%' : '—' }}
+                </p>
+              </div>
+            </div>
           </div>
         </template>
 
@@ -500,6 +564,62 @@
           </div>
         </template>
 
+        <!-- Interim snapshot from Kafka streaming pipeline -->
+        <div v-if="school.interim" class="mt-4 pt-4 border-t border-teal-100">
+          <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
+            {{ new Date().getFullYear() }}
+            <span class="normal-case font-normal">(current year — interim data)</span>
+          </p>
+          <div class="bg-teal-50 border border-teal-100 rounded-lg p-3">
+            <p class="text-xs text-teal-600 mb-3">
+              Simulated real-time data
+              · Day {{ school.interim.simulation_day }}
+              · {{ school.interim.snapshot_type === 'end_of_day' ? 'End of day' : 'Midday' }}
+            </p>
+            <!-- Desktop -->
+            <div class="hidden sm:grid sm:grid-cols-4 sm:gap-2 sm:text-center">
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Vacancy at Open</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Applied</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">Remaining</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5">% Filled</p>
+                <p class="text-sm font-semibold text-teal-900">
+                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
+                </p>
+              </div>
+            </div>
+            <!-- Mobile 2×2 -->
+            <div class="sm:hidden grid grid-cols-2 gap-2 text-center">
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Vacancy at Open</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Applied</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Remaining</p>
+                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-teal-500 mb-0.5 leading-tight">% Filled</p>
+                <p class="text-sm font-semibold text-teal-900">
+                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- History rows -->
         <div class="divide-y divide-gray-200">
@@ -508,9 +628,11 @@
             :class="yr.is_current_year ? 'opacity-30' : ''">
 
             <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
-              {{ yr.registration_year }}
               <span v-if="yr.is_current_year" class="normal-case font-normal">
-                (current year — pending official data)
+                <!-- (current year — pending official data) -->
+              </span>
+              <span v-else class="normal-case font-normal">
+                {{ yr.registration_year }}
               </span>
             </p>
 
@@ -654,63 +776,6 @@
 
               </template>
             </template>
-          </div>
-        </div>
-
-        <!-- Interim snapshot from Kafka streaming pipeline -->
-        <div v-if="school.interim" class="mt-4 pt-4 border-t border-teal-100">
-          <p class="font-bold text-gray-900 uppercase tracking-wide mb-2">
-            {{ new Date().getFullYear() }}
-            <span class="normal-case font-normal">(current year — interim data)</span>
-          </p>
-          <div class="bg-teal-50 border border-teal-100 rounded-lg p-3">
-            <p class="text-xs text-teal-600 mb-3">
-              Simulated real-time data
-              · Day {{ school.interim.simulation_day }}
-              · {{ school.interim.snapshot_type === 'end_of_day' ? 'End of day' : 'Midday' }}
-            </p>
-            <!-- Desktop -->
-            <div class="hidden sm:grid sm:grid-cols-4 sm:gap-2 sm:text-center">
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5">Vacancy at Open</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5">Applied</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5">Remaining</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5">% Filled</p>
-                <p class="text-sm font-semibold text-teal-900">
-                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
-                </p>
-              </div>
-            </div>
-            <!-- Mobile 2×2 -->
-            <div class="sm:hidden grid grid-cols-2 gap-2 text-center">
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Vacancy at Open</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_at_open }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Applied</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.applied_count }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5 leading-tight">Remaining</p>
-                <p class="text-sm font-semibold text-teal-900">{{ school.interim.vacancy_remaining }}</p>
-              </div>
-              <div>
-                <p class="text-xs text-teal-500 mb-0.5 leading-tight">% Filled</p>
-                <p class="text-sm font-semibold text-teal-900">
-                  {{ (school.interim.pct_filled * 100).toFixed(1) }}%
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
