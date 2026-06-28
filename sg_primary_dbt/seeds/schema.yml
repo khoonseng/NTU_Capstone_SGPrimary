@@ -67,3 +67,14 @@ seeds:
         tests:
           - unique
           - not_null
+
+  - name: app_config
+    description: "Feature flags and runtime configuration. Initialize with dbt seed; toggle values via BigQuery DML. Note: dbt seed resets all values to CSV defaults."
+    columns:
+      - name: config_key
+        tests:
+          - unique
+          - not_null
+      - name: config_value
+        tests:
+          - not_null

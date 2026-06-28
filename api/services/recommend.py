@@ -25,6 +25,7 @@ Query strategy:
 
 from datetime import date
 from google.cloud import bigquery
+from api.config import get_app_config_flag
 from api.services.bigquery import run_query, get_dataset
 
 
@@ -667,10 +668,20 @@ def get_recommendations_with_phase(
     rows = run_query(sql, params)
     result = _assemble_with_phase(rows, phase, current_year)
 
+    # Enrich each school with its latest Kafka snapshot when the feature flag is on.
+    # Toggle via: UPDATE `sg_moe.app_config` SET config_value = 'true' WHERE config_key = 'show_interim_data'
+    if get_app_config_flag("show_interim_data"):
+        interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
+        for school in result:
+            school["interim"] = interim_by_school.get(school["school_name"])
+    # else:
+    #     for school in result:
+    #         school["interim"] = None
+
     # Enrich each school with its latest Kafka snapshot (None if not yet produced).
-    interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
-    for school in result:
-        school["interim"] = interim_by_school.get(school["school_name"])
+    # interim_by_school = fetch_vacancy_interim(zone_code, dgp_code, phase, current_year)
+    # for school in result:
+    #     school["interim"] = interim_by_school.get(school["school_name"])
 
     return result
 
