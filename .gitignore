@@ -224,8 +224,9 @@ keys/
 # connections
 sg_primary_dbt/profiles.yml
 
-# ML model artifacts
+# ML model artifacts and experiment tracking
 ml/model/
+ml/mlruns/
 
 # Frontend
 frontend/dist
