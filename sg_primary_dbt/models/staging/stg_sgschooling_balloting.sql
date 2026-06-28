@@ -13,7 +13,27 @@
 WITH
 
 -- ---------------------------------------------------------------------------
--- STEP 1: Base — read from raw source, fix curly apostrophe immediately
+-- STEP 0: Deduplicate raw source
+--
+-- raw_sgschooling_balloting uses WRITE_APPEND, so re-running the DAG for the
+-- same year produces duplicate rows. All duplicates are identical in content
+-- (historical ballot results don't change between scrapes); scraped_at DESC
+-- picks the most recent load batch when more than one exists.
+--
+-- Natural key: (school_name, phase, registration_year) — one row per
+-- school x phase x year in the source data.
+-- ---------------------------------------------------------------------------
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY school_name, phase, registration_year
+            ORDER BY scraped_at DESC
+        ) AS _row_num
+    FROM {{ source('sg_moe', 'raw_sgschooling_balloting') }}
+),
+
+-- ---------------------------------------------------------------------------
+-- STEP 1: Base — read from deduped source, fix curly apostrophe immediately
 --
 -- The curly right single quotation mark (Unicode U+2019) appears in school
 -- names scraped from sgschooling.com e.g. "CHIJ ST. NICHOLAS GIRLS'".
@@ -68,7 +88,8 @@ base AS (
         registration_year,
         scraped_at
 
-    FROM {{ source('sg_moe', 'raw_sgschooling_balloting') }}
+    FROM deduped
+    WHERE _row_num = 1
 ),
 
 -- ---------------------------------------------------------------------------
