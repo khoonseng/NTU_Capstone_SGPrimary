@@ -62,6 +62,11 @@ x-airflow-common:
     - ../../sg_primary_dbt:/opt/airflow/sg_primary_dbt
     # GCP service account key — never baked into the image.
     - ../../keys:/opt/airflow/keys
+    # ML training scripts — train.py called via BashOperator
+    - ../../ml:/opt/airflow/ml
+  networks:
+    - default
+    - sgprimary-net
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -259,3 +264,8 @@ services:
 
 volumes:
   postgres-db-volume:
+
+networks:
+  default:
+  sgprimary-net:
+    external: true

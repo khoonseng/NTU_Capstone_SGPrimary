@@ -2,10 +2,17 @@ services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:v3.13.0
     container_name: sgprimary-mlflow
+    hostname: sgprimary-mlflow
     ports:
       - "5000:5000"
     volumes:
       - ../../ml/mlruns:/mlflow/mlruns
+    environment:
+      # MLflow 3.x rejects any Host header not on this allowlist (DNS rebinding
+      # protection). The Airflow worker reaches the server as sgprimary-mlflow:5000
+      # over the shared sgprimary-net network, so that pattern must be allowed.
+      # localhost/127.0.0.1 kept for browser access to the UI on the host.
+      MLFLOW_SERVER_ALLOWED_HOSTS: "sgprimary-mlflow:*,localhost:*,127.0.0.1:*"
     command: >
       mlflow server
       --host 0.0.0.0
@@ -13,4 +20,10 @@ services:
       --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db
       --artifacts-destination /mlflow/mlruns/artifacts
       --serve-artifacts
+    networks:
+      - sgprimary-net
     restart: unless-stopped
+
+networks:
+  sgprimary-net:
+    external: true
