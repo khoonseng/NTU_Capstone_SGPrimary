@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SGPrimary — Technical Architecture</title>
+<meta name="description" content="Visual data engineering architecture for SGPrimary — batch, streaming, ML, and serving across a BigQuery warehouse.">
+
+<style>
+  :root {
+    --ink:       #16243f;
+    --ink-soft:  #5b6b7d;
+    --ink-faint: #93a0ad;
+    --paper:     #ffffff;
+
+    --flow-blue:  #5b9bd5;
+    --flow-orange:#ef8a3c;
+    --flow-green: #44a878;
+    --flow-violet:#7a57c8;
+    --flow-indigo:#5a6ad0;
+
+    --lane-data-bg:   #ecfaf1;  --lane-data-bd:   #b9e6c9;  --lane-data-tab:#1f8a4f;
+    --lane-stream-bg: #f3edfb;  --lane-stream-bd: #d8c8f0;  --lane-stream-tab:#6a45c2;
+    --lane-ml-bg:     #eceefb;  --lane-ml-bd:     #c8cef2;  --lane-ml-tab:  #4150c4;
+    --lane-app-bg:    #eaf2fc;  --lane-app-bd:    #c3d8f2;  --lane-app-tab: #2f72c0;
+
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f6f8fb;
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(22px, 4vw, 44px) clamp(14px, 3vw, 34px) 64px;
+  }
+
+  /* ── Masthead ─────────────────────────────────────────── */
+  .masthead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+  h1 {
+    font-size: clamp(23px, 3.4vw, 33px);
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    line-height: 1.1;
+    color: #15233d;
+  }
+  .sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .sub .chev { color: var(--ink-faint); padding: 0 2px; }
+  .version {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    padding-top: 6px;
+  }
+
+  /* ── Lane ─────────────────────────────────────────────── */
+  .lane {
+    border-radius: 14px;
+    border: 1.5px solid var(--bd);
+    background: var(--bg);
+    padding: 22px 20px 20px;
+    margin-bottom: 18px;
+  }
+  .lane-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 14px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--paper);
+    border: 1.5px solid var(--bd);
+    border-radius: 8px;
+    padding: 6px 12px 6px 10px;
+    font-weight: 680;
+    font-size: 14px;
+    color: var(--tab);
+    box-shadow: 0 1px 2px rgba(20,40,60,0.04);
+  }
+  .tab svg { display: block; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--bd);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+  .chip .ai { width: 12px; height: 12px; }
+
+  /* ── Flow row ─────────────────────────────────────────── */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    overflow-x: auto;
+    padding: 14px 2px 6px;
+  }
+  .flow::-webkit-scrollbar { height: 8px; }
+  .flow::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 4px; }
+
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 104px;
+    flex: none;
+    justify-content: flex-end;
+  }
+  .icon {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 7px;
+  }
+  .icon svg { display: block; }
+  .n-title { font-size: 13px; font-weight: 660; color: #1d2a3e; line-height: 1.2; }
+  .n-sub   { font-size: 10.5px; color: var(--ink-faint); margin-top: 2px; line-height: 1.25; }
+  .n-sub code { font-family: var(--mono); font-size: 10px; }
+
+  .srcstack { display: flex; flex-direction: column; gap: 16px; flex: none; }
+
+  /* vertical sub-branch (e.g. MLflow above train) */
+  .vstack { display: flex; flex-direction: column; align-items: center; flex: none; }
+  .vconn { position: relative; display: flex; flex-direction: column; align-items: center; height: 30px; margin: 4px 0; }
+  .vconn .vhead {
+    width: 0; height: 0;
+    border-bottom: 8px solid var(--c);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+  }
+  .vconn .vline { width: 2px; flex: 1; background: var(--c); }
+  .vlabel {
+    position: absolute; left: calc(50% + 9px); top: 50%;
+    transform: translateY(-50%);
+    font-size: 10.5px; color: var(--c); white-space: nowrap; font-weight: 500;
+  }
+
+  /* ── Connector arrow ──────────────────────────────────── */
+  .conn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 52px;
+    min-width: 50px;
+    align-self: center;
+    margin-bottom: 26px; /* aligns arrow with icon row, leaving room for label */
+  }
+  .conn .line { flex: 1; height: 2px; background: var(--c); }
+  .conn .head {
+    width: 0; height: 0;
+    border-left: 8px solid var(--c);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .conn .head-l {
+    width: 0; height: 0;
+    border-right: 8px solid var(--c);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .conn .lbl {
+    position: absolute; left: 50%; bottom: 9px;
+    transform: translateX(-50%);
+    font-size: 11.5px; font-weight: 550; color: var(--c);
+    white-space: nowrap; line-height: 1.1;
+  }
+  .conn .lbl-top {
+    position: absolute; left: 50%; top: 9px;
+    transform: translateX(-50%);
+    font-size: 11.5px; font-weight: 550; color: var(--flow-blue);
+    white-space: nowrap;
+  }
+
+  .c-blue   { --c: var(--flow-blue); }
+  .c-orange { --c: var(--flow-orange); }
+  .c-green  { --c: var(--flow-green); }
+  .c-violet { --c: var(--flow-violet); }
+  .c-indigo { --c: var(--flow-indigo); }
+
+  footer {
+    margin-top: 30px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lane { animation: rise 0.5s ease both; }
+    .lane:nth-child(3){ animation-delay: .06s; }
+    .lane:nth-child(4){ animation-delay: .12s; }
+    .lane:nth-child(5){ animation-delay: .18s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Architecture Overview : From Raw Data to Balloting Insights</h1>
+      <p class="sub">Batch ingestion <span class="chev">·</span> Kafka streaming <span class="chev">·</span> ML on MLflow <span class="chev">·</span> Cloud Run API <span class="chev">→</span> BigQuery warehouse</p>
+    </div>
+    <div class="version">PERSONAL PROJECT • v0.2 • DEMO</div>
+  </header>
+
+  <!-- ════════════ LANE 1 — DATA PIPELINE (batch) ════════════ -->
+  <section class="lane" style="--bg:var(--lane-data-bg); --bd:var(--lane-data-bd); --tab:var(--lane-data-tab);">
+    <div class="lane-head">
+      <span class="tab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+        Data Pipeline
+      </span>
+      <div class="chips">
+        <span class="chip"><svg class="ai" viewBox="0 0 24 24" fill="#017CEE"><g transform="rotate(0 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><g transform="rotate(120 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><g transform="rotate(240 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><circle cx="12" cy="12" r="1.6" fill="#fff"/></svg>Airflow · p1_phase_results_scraper</span>
+        <span class="chip">school_metadata_refresh</span>
+      </div>
+    </div>
+
+    <div class="flow">
+      <!-- sources -->
+      <div class="srcstack">
+        <div class="node">
+          <span class="icon">
+            <svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#3a4654" stroke-width="2"><circle cx="24" cy="24" r="19"/><ellipse cx="24" cy="24" rx="9" ry="19"/><line x1="5" y1="24" x2="43" y2="24"/><line x1="8" y1="14" x2="40" y2="14"/><line x1="8" y1="34" x2="40" y2="34"/></svg>
+          </span>
+          <span class="n-title">data.gov.sg</span>
+          <span class="n-sub">School metadata · REST API</span>
+        </div>
+        <div class="node">
+          <span class="icon">
+            <svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#3a4654" stroke-width="2"><circle cx="24" cy="24" r="19"/><ellipse cx="24" cy="24" rx="9" ry="19"/><line x1="5" y1="24" x2="43" y2="24"/><line x1="8" y1="14" x2="40" y2="14"/><line x1="8" y1="34" x2="40" y2="34"/></svg>
+          </span>
+          <span class="n-title">sgschooling.com</span>
+          <span class="n-sub">P1 ballot history · scrape</span>
+        </div>
+      </div>
+
+      <div class="conn c-blue"><span class="lbl">ingest</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M9 13h30l-2.4 24a3 3 0 0 1-3 2.7H14.4a3 3 0 0 1-3-2.7Z" fill="#4285F4"/><rect x="6" y="8" width="36" height="7" rx="3" fill="#669df6"/><circle cx="24" cy="24" r="3.2" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">Cloud Storage</span>
+        <span class="n-sub">Raw archive · Parquet</span>
+      </div>
+
+      <div class="conn c-blue"><span class="lbl">load</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery</span>
+        <span class="n-sub">Raw schema · sg_moe</span>
+      </div>
+
+      <div class="conn c-blue"><span class="lbl">dbt run</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="46" height="46" viewBox="0 0 48 48"><g stroke="#FF694A" stroke-width="7" stroke-linecap="round"><line x1="24" y1="6" x2="24" y2="42"/><line x1="8" y1="15" x2="40" y2="33"/><line x1="8" y1="33" x2="40" y2="15"/></g></svg>
+        </span>
+        <span class="n-title">dbt</span>
+        <span class="n-sub">Staging &amp; star models</span>
+      </div>
+
+      <div class="conn c-orange"><span class="lbl">transform</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery</span>
+        <span class="n-sub">Star schema &amp; marts</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ LANE 2 — STREAMING (Kafka) ════════════ -->
+  <section class="lane" style="--bg:var(--lane-stream-bg); --bd:var(--lane-stream-bd); --tab:var(--lane-stream-tab);">
+    <div class="lane-head">
+      <span class="tab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="12" r="1.8"/><circle cx="8" cy="5" r="1.6"/><circle cx="8" cy="19" r="1.6"/><circle cx="17" cy="7.5" r="2.2"/><circle cx="17" cy="16.5" r="2.2"/><g stroke="currentColor" stroke-width="1.4"><line x1="8" y1="12" x2="17" y2="7.5"/><line x1="8" y1="12" x2="17" y2="16.5"/></g></svg>
+        Streaming Pipeline
+      </span>
+      <div class="chips">
+        <span class="chip">Standalone Kafka stack</span>
+        <span class="chip">at-least-once · manual offset commit</span>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery mart</span>
+        <span class="n-sub">seed · mart_school_analysis</span>
+      </div>
+
+      <div class="conn c-violet"><span class="lbl">seed query</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="48" height="48" viewBox="0 0 48 48"><rect x="6" y="9" width="36" height="30" rx="5" fill="#2b3a4f"/><path d="M15 19l6 5-6 5" fill="none" stroke="#7fb2e6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25" y1="31" x2="34" y2="31" stroke="#aebfce" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </span>
+        <span class="n-title">Producer</span>
+        <span class="n-sub">Python · replay / realtime</span>
+      </div>
+
+      <div class="conn c-violet"><span class="lbl">produce</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="#231F20"><g stroke="#231F20" stroke-width="2.6" fill="none"><line x1="18" y1="9" x2="18" y2="39"/><line x1="18" y1="24" x2="32" y2="14"/><line x1="18" y1="24" x2="32" y2="34"/></g><circle cx="18" cy="9" r="3.3"/><circle cx="18" cy="24" r="3.3"/><circle cx="18" cy="39" r="3.3"/><circle cx="33" cy="13.5" r="4.4"/><circle cx="33" cy="34.5" r="4.4"/></svg>
+        </span>
+        <span class="n-title">Kafka topic</span>
+        <span class="n-sub"><code>p1_vacancy_snapshots</code></span>
+      </div>
+
+      <div class="conn c-violet"><span class="lbl">consume</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="48" height="48" viewBox="0 0 48 48"><rect x="6" y="9" width="36" height="30" rx="5" fill="#2b3a4f"/><path d="M15 19l6 5-6 5" fill="none" stroke="#7fb2e6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25" y1="31" x2="34" y2="31" stroke="#aebfce" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </span>
+        <span class="n-title">Consumer</span>
+        <span class="n-sub">Python · commit after write</span>
+      </div>
+
+      <div class="conn c-violet"><span class="lbl">insert</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery raw</span>
+        <span class="n-sub"><code>raw_p1_vacancy_snapshots</code></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ LANE 3 — ML & EXPERIMENT TRACKING ════════════ -->
+  <section class="lane" style="--bg:var(--lane-ml-bg); --bd:var(--lane-ml-bd); --tab:var(--lane-ml-tab);">
+    <div class="lane-head">
+      <span class="tab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><circle cx="6" cy="13" r="2"/><circle cx="18" cy="13" r="2"/><circle cx="6" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M12 6 6 11M12 6l6 5M6 15v3M18 15v3"/></svg>
+        ML &amp; Experiment Tracking
+      </span>
+      <div class="chips">
+        <span class="chip"><svg class="ai" viewBox="0 0 24 24" fill="#017CEE"><g transform="rotate(0 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><g transform="rotate(120 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><g transform="rotate(240 12 12)"><path d="M12 12c-1-5 1-9 5-9-1 4-1 7-5 9z"/></g><circle cx="12" cy="12" r="1.6" fill="#fff"/></svg>Airflow · ml_subscription_rate_training</span>
+        <span class="chip">precomputed · yearly refresh</span>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery mart</span>
+        <span class="n-sub">features · lag &amp; rate</span>
+      </div>
+
+      <div class="conn c-indigo"><span class="lbl">read features</span><span class="line"></span><span class="head"></span></div>
+
+      <!-- train node with MLflow branch above -->
+      <div class="vstack">
+        <div class="node">
+          <span class="icon">
+            <svg width="46" height="46" viewBox="0 0 48 48" fill="none"><path d="M37 24C37 31.2 31.2 37 24 37C16.8 37 11 31.2 11 24C11 17.4 16.4 12 23 12C28.5 12 33 16.5 33 22C33 26.4 29.4 30 25 30C21.7 30 19 27.3 19 24" stroke="#0194E2" stroke-width="4.4" stroke-linecap="round"/><circle cx="19" cy="24" r="2.2" fill="#0194E2"/></svg>
+          </span>
+          <span class="n-title">MLflow</span>
+          <span class="n-sub">runs · metrics · registry</span>
+        </div>
+        <div class="vconn c-indigo"><span class="vhead"></span><span class="vline"></span><span class="vlabel">log run · register champion</span></div>
+        <div class="node">
+          <span class="icon">
+            <svg width="46" height="46" viewBox="0 0 48 48"><g stroke="#2e8b57" stroke-width="2.4" fill="none" stroke-linecap="round"><line x1="24" y1="10" x2="14" y2="24"/><line x1="24" y1="10" x2="34" y2="24"/><line x1="14" y1="24" x2="10" y2="38"/><line x1="14" y1="24" x2="18" y2="38"/><line x1="34" y1="24" x2="30" y2="38"/><line x1="34" y1="24" x2="38" y2="38"/></g><g fill="#2e8b57"><circle cx="24" cy="10" r="3.8"/><circle cx="14" cy="24" r="3.2"/><circle cx="34" cy="24" r="3.2"/><circle cx="10" cy="38" r="2.8"/><circle cx="18" cy="38" r="2.8"/><circle cx="30" cy="38" r="2.8"/><circle cx="38" cy="38" r="2.8"/></g></svg>
+          </span>
+          <span class="n-title">LightGBM</span>
+          <span class="n-sub">train.py · regression</span>
+        </div>
+      </div>
+
+      <div class="conn c-indigo"><span class="lbl">write predictions</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery mart</span>
+        <span class="n-sub"><code>mart_ml_predictions</code></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ LANE 4 — APPLICATION LAYER ════════════ -->
+  <section class="lane" style="--bg:var(--lane-app-bg); --bd:var(--lane-app-bd); --tab:var(--lane-app-tab);">
+    <div class="lane-head">
+      <span class="tab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="11" rx="1.5"/><path d="M7 19h6M9.5 15v4"/><rect x="17" y="9" width="5" height="11" rx="1.5"/></svg>
+        Application Layer
+      </span>
+      <div class="chips">
+        <span class="chip">Firebase Hosting</span>
+        <span class="chip">Cloud Run · us-central1</span>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="node">
+        <span class="icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#3a4654" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="27" height="19" rx="2"/><path d="M15 35h8M19 29v6"/><rect x="30" y="21" width="12" height="18" rx="2" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">Users</span>
+        <span class="n-sub">Desktop or mobile</span>
+      </div>
+
+      <div class="conn c-blue"><span class="lbl">loads app</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="46" height="46" viewBox="0 0 48 48"><path d="M11 36 22 6c.6-1.6 2.6-1.4 3.2.2L29 17 18 31Z" fill="#FFC24A"/><path d="M11 36l7-5 11-14 8 19a15 15 0 0 1-26 0Z" fill="#F4A11E"/><path d="M11 36l7-5 5.5-7L37 36a15 15 0 0 1-26 0Z" fill="#FF7043" opacity="0.55"/></svg>
+        </span>
+        <span class="n-title">Firebase</span>
+        <span class="n-sub">Static hosting</span>
+      </div>
+
+      <div class="conn c-orange"><span class="lbl">serves</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="46" height="46" viewBox="0 0 48 48"><path d="M4 9h8l12 20L36 9h8L24 43Z" fill="#41B883"/><path d="M14 9h8l2 4 2-4h8L24 27Z" fill="#35495E"/></svg>
+        </span>
+        <span class="n-title">Vue 3</span>
+        <span class="n-sub">Vite build · Tailwind</span>
+      </div>
+
+      <div class="conn c-green">
+        <span class="lbl-top">JSON</span>
+        <span class="head-l"></span><span class="line" style="background:var(--flow-green)"></span><span class="head"></span>
+        <span class="lbl">Axios GET</span>
+      </div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#4285F4"/><g stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l8 8-8 8"/><path d="M26 16l8 8-8 8"/></g></svg>
+        </span>
+        <span class="n-title">Cloud Run</span>
+        <span class="n-sub">FastAPI</span>
+      </div>
+
+      <div class="conn c-blue"><span class="lbl">SQL queries</span><span class="line"></span><span class="head"></span></div>
+
+      <div class="node">
+        <span class="icon">
+          <svg width="50" height="50" viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" fill="#4285F4"/><circle cx="22" cy="22" r="7.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="27.5" y1="27.5" x2="33" y2="33" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="22" r="1.3" fill="#fff"/><circle cx="22" cy="22" r="1.3" fill="#fff"/><circle cx="25" cy="22" r="1.3" fill="#fff"/></svg>
+        </span>
+        <span class="n-title">BigQuery</span>
+        <span class="n-sub">Star schema &amp; marts</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>BigQuery · dbt · Apache Airflow · Apache Kafka · LightGBM · MLflow · FastAPI · Vue 3 — local-first, GCP free tier</footer>
+
+</div>
+
+</body>
+</html>
